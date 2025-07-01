@@ -67,7 +67,7 @@ app.use('/api/users', userRoutes);
 // app.use('/api/admin', adminRoutes);
 
 // Socket.io setup
-setupSocketHandlers(io);
+// setupSocketHandlers(io);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
