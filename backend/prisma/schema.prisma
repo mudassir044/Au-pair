@@ -76,8 +76,8 @@ model AuPairProfile {
   lastName           String
   dateOfBirth        DateTime
   bio                String?
-  languages          String[] // JSON array of languages
-  skills             String[] // JSON array of skills
+  languages          String? // JSON string array of languages
+  skills             String? // JSON string array of skills
   experience         String?
   education          String?
   videoUrl           String?
