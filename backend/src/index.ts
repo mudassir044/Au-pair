@@ -18,7 +18,7 @@ import userRoutes from './routes/users-simple';
 
 // Import middleware
 import { authMiddleware } from './middleware/auth';
-import { setupSocketHandlers } from './sockets/messageHandlers';
+// import { setupSocketHandlers } from './sockets/messageHandlers';
 
 // Load environment variables from .env file
 const path = require('path');
