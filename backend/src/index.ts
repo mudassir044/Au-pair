@@ -5,7 +5,6 @@ import morgan from 'morgan';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
-import dotenv from 'dotenv';
 
 // Import routes
 import authRoutes from './routes/auth';
