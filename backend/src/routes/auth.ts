@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Generate email verification token
-    const emailVerifyToken = uuidv4();
+    const emailVerifyToken = crypto.randomBytes(32).toString('hex');
 
     // Create user
     const user = await prisma.user.create({
