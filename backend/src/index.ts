@@ -20,8 +20,9 @@ import adminRoutes from './routes/admin';
 import { authMiddleware } from './middleware/auth';
 import { setupSocketHandlers } from './sockets/messageHandlers';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from .env file
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 const server = createServer(app);
