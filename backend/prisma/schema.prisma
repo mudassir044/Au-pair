@@ -105,9 +105,9 @@ model HostFamilyProfile {
   location          String
   country           String
   numberOfChildren  Int
-  childrenAges      Int[] // JSON array of ages
+  childrenAges      String? // JSON string array of ages
   requirements      String?
-  preferredLanguages String[] // JSON array of languages
+  preferredLanguages String? // JSON string array of languages
   maxBudget         Float?
   currency          String   @default("USD")
   profilePhotoUrl   String?
