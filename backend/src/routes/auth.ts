@@ -236,7 +236,7 @@ router.post('/forgot-password', async (req, res) => {
       return res.json({ message: 'If the email exists, a password reset link has been sent' });
     }
 
-    const resetToken = uuidv4();
+    const resetToken = crypto.randomBytes(32).toString('hex');
     const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     await prisma.user.update({
