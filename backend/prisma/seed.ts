@@ -77,9 +77,9 @@ async function main() {
           location: 'San Francisco, CA',
           country: 'USA',
           numberOfChildren: 2,
-          childrenAges: [5, 8],
+          childrenAges: JSON.stringify([5, 8]),
           requirements: 'Must be comfortable with pets, non-smoker preferred',
-          preferredLanguages: ['English', 'French'],
+          preferredLanguages: JSON.stringify(['English', 'French']),
           maxBudget: 20.0,
           currency: 'USD'
         }
