@@ -81,7 +81,7 @@ model AuPairProfile {
   experience         String?
   education          String?
   videoUrl           String?
-  preferredCountries String[] // JSON array of country codes
+  preferredCountries String? // JSON string array of country codes
   hourlyRate         Float?
   currency           String   @default("USD")
   availableFrom      DateTime?
