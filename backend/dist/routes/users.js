@@ -5,7 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = require("../index");
+const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
+// Apply auth middleware to all routes
+router.use(auth_1.authMiddleware);
 // Get all users (for admin)
 router.get('/', async (req, res) => {
     try {

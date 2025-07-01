@@ -20,8 +20,6 @@ const messages_1 = __importDefault(require("./routes/messages"));
 const documents_1 = __importDefault(require("./routes/documents"));
 const bookings_1 = __importDefault(require("./routes/bookings"));
 const admin_1 = __importDefault(require("./routes/admin"));
-// Import middleware
-const auth_2 = require("./middleware/auth");
 const messageHandlers_1 = require("./sockets/messageHandlers");
 // Load environment variables from .env file
 const path = require('path');
@@ -56,13 +54,13 @@ app.get('/api/health', (req, res) => {
 });
 // Routes
 app.use('/api/auth', auth_1.default);
-app.use('/api/users', auth_2.authMiddleware, users_1.default);
-app.use('/api/profiles', auth_2.authMiddleware, profiles_1.default);
-app.use('/api/matches', auth_2.authMiddleware, matches_1.default);
-app.use('/api/messages', auth_2.authMiddleware, messages_1.default);
-app.use('/api/documents', auth_2.authMiddleware, documents_1.default);
-app.use('/api/bookings', auth_2.authMiddleware, bookings_1.default);
-app.use('/api/admin', auth_2.authMiddleware, admin_1.default);
+app.use('/api/users', users_1.default);
+app.use('/api/profiles', profiles_1.default);
+app.use('/api/matches', matches_1.default);
+app.use('/api/messages', messages_1.default);
+app.use('/api/documents', documents_1.default);
+app.use('/api/bookings', bookings_1.default);
+app.use('/api/admin', admin_1.default);
 // Socket.io setup
 (0, messageHandlers_1.setupSocketHandlers)(io);
 // Error handling middleware
