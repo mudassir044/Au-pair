@@ -7,14 +7,14 @@ import { Server } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
 
 // Import routes
-import authRoutes from './routes/auth';
-import userRoutes from './routes/users';
-import profileRoutes from './routes/profiles';
-import matchRoutes from './routes/matches';
-import messageRoutes from './routes/messages';
-import documentRoutes from './routes/documents';
-import bookingRoutes from './routes/bookings';
-import adminRoutes from './routes/admin';
+import authRoutes from './routes/auth-simple';
+import userRoutes from './routes/users-simple';
+// import profileRoutes from './routes/profiles';
+// import matchRoutes from './routes/matches';
+// import messageRoutes from './routes/messages';
+// import documentRoutes from './routes/documents';
+// import bookingRoutes from './routes/bookings';
+// import adminRoutes from './routes/admin';
 
 // Import middleware
 import { authMiddleware } from './middleware/auth';
