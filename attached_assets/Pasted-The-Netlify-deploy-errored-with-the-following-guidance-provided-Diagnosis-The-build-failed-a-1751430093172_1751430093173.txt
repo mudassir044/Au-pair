@@ -1,0 +1,101 @@
+The Netlify deploy errored, with the following guidance provided:
+
+**Diagnosis:**
+The build failed at line 72 due to a compilation error in file "src/app/onboarding/page.tsx" at line 75. The error states that the "use client" directive must be placed before other expressions.
+
+**Solution:**
+To resolve this error, move the "use client" directive to the top of the file, before any other expressions like so:
+
+```javascript
+'use client';
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+// Rest of the code follows...
+```
+
+After making this adjustment, commit the changes and trigger a new build to verify the issue is resolved.
+
+The relevant error logs are:
+
+Line 0: build-image version: 9d5e089ad8ecaafb0161bb0f3dc3590dda973c71 (noble)
+Line 1: buildbot version: c5127b7ed30083b5c3949537dc2c6164a9d943b6
+Line 2: Fetching cached dependencies
+Line 3: Failed to fetch cache, continuing with build
+Line 4: Starting to prepare the repo for build
+Line 5: No cached dependencies found. Cloning fresh repo
+Line 6: git clone --filter=blob:none https://github.com/mudassir044/Au-pair
+Line 7: Preparing Git Reference refs/heads/main
+Line 8: Custom publish path detected. Proceeding with the specified path: 'frontend'
+Line 9: Starting to install dependencies
+Line 10: Using PHP version
+Line 11: v22.17.0 is already installed.
+Line 12: Now using node v22.17.0 (npm v10.9.2)
+Line 13: Enabling Node.js Corepack
+Line 44: [36m[1m​[22m[39m
+Line 45: [36m[1m❯ Config file[22m[39m
+Line 46:   No config file was defined: using default values.
+Line 47: [36m[1m​[22m[39m
+Line 48: [36m[1m❯ Context[22m[39m
+Line 49:   production
+Line 50: [36m[1m​[22m[39m
+Line 51: [36m[1m❯ Installing extensions[22m[39m
+Line 52:    - neon
+Line 53:    - simpleanalytics
+Line 54: Failed during stage 'building site': Build script returned non-zero exit code: 2
+Line 55: [36m[1m​[22m[39m
+Line 56: [36m[1m❯ Loading extensions[22m[39m
+Line 57:    - neon
+Line 58:    - simpleanalytics
+Line 59: [96m[1m​[22m[39m
+Line 60: [96m[1mBuild command from Netlify app                                [22m[39m
+Line 61: [96m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 62: ​
+Line 63: [36m$ npm run build[39m
+Line 64: > frontend@0.1.0 build
+Line 65: > next build
+Line 66:  [33m[1m⚠[22m[39m Invalid next.config.ts options detected:
+Line 67:  [33m[1m⚠[22m[39m     Unrecognized key(s) in object: 'outputFileTracingRoot' at "experimental"
+Line 68:  [33m[1m⚠[22m[39m See more info here: https://nextjs.org/docs/messages/invalid-next-config
+Line 69: [33m[1m⚠[22m[39m No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/doc
+Line 70:    [1m[38;2;173;127;168m▲ Next.js 15.3.4[39m[22m
+Line 71:  [37m[1m [22m[39m Creating an optimized production build ...
+Line 72: [31mFailed to compile.
+Line 73: [39m
+Line 74: ./src/app/onboarding/page.tsx
+Line 75: Error:   [31mx[0m The "use client" directive must be placed before other expressions. Move it to the top of the file to resolv
+Line 76:      ,-[[36;1;4m/opt/build/repo/frontend/src/app/onboarding/page.tsx[0m:572:1]
+Line 77:  [2m569[0m |     </div>
+Line 78:  [2m570[0m |   )
+Line 79:  [2m571[0m | }
+Line 80:  [2m572[0m | 'use client'
+Line 81:      : [35;1m^^^^^^^^^^^^[0m
+Line 82:  [2m573[0m |
+Line 83:  [2m574[0m | import { useEffect } from 'react'
+Line 84:  [2m575[0m | import { useRouter } from 'next/navigation'
+Line 85:      `----
+
+Import trace for requested module:
+./src/app/onboarding/page.tsx
+Line 86: > Build failed because of webpack errors
+Line 87: [91m[1m​[22m[39m
+Line 88: [91m[1m"build.command" failed                                        [22m[39m
+Line 89: [91m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 90: ​
+Line 91:   [31m[1mError message[22m[39m
+Line 92:   Command failed with exit code 1: npm run build
+Line 93: ​
+Line 94:   [31m[1mError location[22m[39m
+Line 95:   In Build command from Netlify app:
+Line 96:   npm run build
+Line 97: ​
+Line 98:   [31m[1mResolved config[22m[39m
+Line 99:   build:
+Line 100:     base: /opt/build/repo/frontend
+Line 101:     command: npm run build
+Line 102:     commandOrigin: ui
+Line 103:     publish: /opt/build/repo/frontend
+Line 104:     publishOrigin: ui
+Line 105: Build failed due to a user error: Build script returned non-zero exit code: 2
+Line 106: Failing build: Failed to build site
+Line 107: Finished processing build request in 1m38.126s
