@@ -43,6 +43,21 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="mt-8 space-x-4">
+            <a 
+              href="/auth/login"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-block"
+            >
+              Sign In
+            </a>
+            <a 
+              href="/auth/register"
+              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 inline-block"
+            >
+              Sign Up
+            </a>
+          </div>
+
           <div className="mt-12 grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-semibold mb-3 text-blue-600">For Au Pairs</h3>
