@@ -13,7 +13,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd frontend && npm run dev"
+args = "cd frontend && npm install && npm run dev"
 
 [[workflows.workflow]]
 name = "Start Backend"
