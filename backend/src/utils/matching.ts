@@ -54,30 +54,30 @@ export const calculateMatchScore = (
 
 const calculateLanguageMatch = (auPairLangs: string[], hostPreferredLangs: string[]): number => {
   if (hostPreferredLangs.length === 0) return 100; // No preference means all are acceptable
-  
+
   const commonLanguages = auPairLangs.filter(lang => 
     hostPreferredLangs.some(preferred => 
       preferred.toLowerCase() === lang.toLowerCase()
     )
   );
-  
+
   return (commonLanguages.length / hostPreferredLangs.length) * 100;
 };
 
 const calculateAgeMatch = (auPairBirthDate: Date, childrenAges: number[]): number => {
   if (!auPairBirthDate || childrenAges.length === 0) return 50; // Neutral score
-  
+
   const auPairAge = Math.floor((Date.now() - auPairBirthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
-  
+
   // Prefer au pairs aged 18-30 for families with young children (0-10)
   // Prefer slightly older au pairs (20-35) for families with teens (11-18)
   const hasYoungChildren = childrenAges.some(age => age <= 10);
   const hasTeens = childrenAges.some(age => age >= 11);
-  
+
   if (hasYoungChildren && auPairAge >= 18 && auPairAge <= 30) return 100;
   if (hasTeens && auPairAge >= 20 && auPairAge <= 35) return 100;
   if (auPairAge >= 18 && auPairAge <= 35) return 70; // Generally acceptable
-  
+
   return 30; // Outside preferred age range
 };
 
@@ -87,33 +87,33 @@ const calculateAvailabilityMatch = (
   hostPreferredStart?: Date
 ): number => {
   if (!auPairFrom || !auPairTo || !hostPreferredStart) return 50; // Neutral score
-  
+
   // Check if host's preferred start date falls within au pair's availability
   if (hostPreferredStart >= auPairFrom && hostPreferredStart <= auPairTo) {
     return 100;
   }
-  
+
   // Calculate how far off the dates are (within 3 months gets partial score)
   const timeDiff = Math.abs(hostPreferredStart.getTime() - auPairFrom.getTime());
   const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
-  
+
   if (daysDiff <= 30) return 80;   // Within a month
   if (daysDiff <= 90) return 60;   // Within 3 months
   if (daysDiff <= 180) return 30;  // Within 6 months
-  
+
   return 10; // More than 6 months apart
 };
 
 const calculateBudgetMatch = (auPairRate?: number, hostBudget?: number): number => {
   if (!auPairRate || !hostBudget) return 50; // Neutral score
-  
+
   if (auPairRate <= hostBudget) return 100;
-  
+
   // Partial score if slightly over budget
   const overBudgetRatio = auPairRate / hostBudget;
   if (overBudgetRatio <= 1.2) return 70; // Up to 20% over budget
   if (overBudgetRatio <= 1.5) return 40; // Up to 50% over budget
-  
+
   return 10; // More than 50% over budget
 };
 
@@ -180,74 +180,4 @@ export const findMatches = async (
   return potentialMatches
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, limit);
-};
-import { UserRole } from '@prisma/client';
-import { prisma } from '../index';
-
-export interface MatchResult {
-  id: string;
-  matchScore: number;
-  profile: any;
-}
-
-export const findMatches = async (userId: string, userRole: UserRole): Promise<MatchResult[]> => {
-  try {
-    if (userRole === 'AU_PAIR') {
-      // Find host families for au pair
-      const hostFamilies = await prisma.user.findMany({
-        where: {
-          role: 'HOST_FAMILY',
-          isActive: true,
-          id: { not: userId }
-        },
-        include: {
-          hostFamilyProfile: true
-        }
-      });
-
-      return hostFamilies.map(host => ({
-        id: host.id,
-        matchScore: calculateMatchScore(userId, host.id, userRole),
-        profile: host.hostFamilyProfile
-      }));
-    } else if (userRole === 'HOST_FAMILY') {
-      // Find au pairs for host family
-      const auPairs = await prisma.user.findMany({
-        where: {
-          role: 'AU_PAIR',
-          isActive: true,
-          id: { not: userId }
-        },
-        include: {
-          auPairProfile: true
-        }
-      });
-
-      return auPairs.map(auPair => ({
-        id: auPair.id,
-        matchScore: calculateMatchScore(userId, auPair.id, userRole),
-        profile: auPair.auPairProfile
-      }));
-    }
-
-    return [];
-  } catch (error) {
-    console.error('Error finding matches:', error);
-    return [];
-  }
-};
-
-export const calculateMatchScore = (userId1: string, userId2: string, userRole: UserRole): number => {
-  // Basic match score calculation - can be enhanced with more sophisticated logic
-  let score = 50; // Base score
-
-  // Add random factor for now - in real implementation, this would be based on:
-  // - Location preferences
-  // - Language matches
-  // - Experience requirements
-  // - Budget compatibility
-  // - Availability overlap
-  score += Math.random() * 50;
-
-  return Math.round(score);
 };
