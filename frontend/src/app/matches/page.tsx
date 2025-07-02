@@ -33,6 +33,7 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [sentRequests, setSentRequests] = useState<Set<string>>(new Set())
   const router = useRouter()
 
   useEffect(() => {
@@ -75,6 +76,9 @@ export default function MatchesPage() {
     const token = localStorage.getItem('accessToken')
     if (!token) return
 
+    // Optimistically add to sent requests
+    setSentRequests(prev => new Set([...prev, targetUserId]))
+
     try {
       const response = await fetch('http://localhost:8001/api/matches', {
         method: 'POST',
@@ -89,12 +93,24 @@ export default function MatchesPage() {
       })
 
       if (response.ok) {
-        alert('Match request sent successfully!')
+        // Keep the button disabled - request was sent successfully
       } else {
         const data = await response.json()
+        // Remove from sent requests if failed
+        setSentRequests(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(targetUserId)
+          return newSet
+        })
         alert(`Failed to send match request: ${data.message}`)
       }
     } catch (error) {
+      // Remove from sent requests if failed
+      setSentRequests(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(targetUserId)
+        return newSet
+      })
       alert('Failed to send match request')
     }
   }
@@ -291,9 +307,14 @@ export default function MatchesPage() {
                       <div className="flex gap-2">
                         <button 
                           onClick={() => sendMatchRequest(match.id)}
-                          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                          disabled={sentRequests.has(match.id)}
+                          className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${
+                            sentRequests.has(match.id) 
+                              ? 'bg-green-100 text-green-800 cursor-not-allowed' 
+                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
                         >
-                          Send Request
+                          {sentRequests.has(match.id) ? 'Request Sent' : 'Send Request'}
                         </button>
                         <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
                           View Profile

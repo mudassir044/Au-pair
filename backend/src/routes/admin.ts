@@ -217,7 +217,7 @@ router.put('/users/:userId/status', async (req: AuthRequest, res) => {
     });
 
     res.json({ message: 'User status updated successfully', user });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Update user status error:', error);
     if (error.code === 'P2025') {
       return res.status(404).json({ message: 'User not found' });
@@ -355,7 +355,7 @@ router.delete('/users/:userId', async (req: AuthRequest, res) => {
     });
 
     res.json({ message: 'User deleted successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delete user error:', error);
     if (error.code === 'P2025') {
       return res.status(404).json({ message: 'User not found' });
