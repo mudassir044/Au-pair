@@ -1,7 +1,9 @@
 
+```toml
 [build]
   command = "npm run build"
   publish = "out"
+  base = "frontend"
 
 [[redirects]]
   from = "/*"
@@ -10,3 +12,4 @@
 
 [build.environment]
   NODE_VERSION = "18"
+```
