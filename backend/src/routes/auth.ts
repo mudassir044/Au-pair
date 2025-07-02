@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { prisma } from '../index';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
 
