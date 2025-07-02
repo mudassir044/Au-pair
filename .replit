@@ -23,3 +23,7 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd backend && npm install && npx prisma generate && npx prisma db push && npm run dev"
+
+[[ports]]
+localPort = 8001
+externalPort = 80
