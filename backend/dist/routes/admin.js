@@ -5,9 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = require("../index");
+const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
-// Apply admin role middleware to all routes
-router.use(roleMiddleware(['ADMIN']));
+// Middleware to ensure admin access
+const requireAdmin = (0, auth_1.authorize)('ADMIN');
 // Get dashboard statistics
 router.get('/dashboard', async (req, res) => {
     try {
@@ -173,7 +174,7 @@ router.get('/users', async (req, res) => {
     }
 });
 // Update user status
-router.put('/users/:userId/status', async (req, res) => {
+router.put('/users/:userId/status', auth_1.authenticate, requireAdmin, async (req, res) => {
     try {
         const { userId } = req.params;
         const { isActive } = req.body;
@@ -201,12 +202,13 @@ router.put('/users/:userId/status', async (req, res) => {
     }
 });
 // Get all matches with filters
-router.get('/matches', async (req, res) => {
+router.get('/matches', auth_1.authenticate, requireAdmin, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const status = req.query.status;
-        const offset = (page - 1) * limit;
+        const hostId = req.query.hostId;
+        const auPairId = req.query.auPairId;
         const whereClause = {};
         if (status && ['PENDING', 'APPROVED', 'REJECTED'].includes(status)) {
             whereClause.status = status;
@@ -367,6 +369,76 @@ router.post('/users/create-admin', async (req, res) => {
     }
     catch (error) {
         console.error('Create admin user error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+// Get all messages with filters
+router.get('/messages', auth_1.authenticate, requireAdmin, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const status = req.query.status;
+        const whereClause = {};
+        // Add filters
+        const messages = await index_1.prisma.message.findMany({
+            where: whereClause,
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            skip: (page - 1) * limit,
+            include: {
+                sender: {
+                    select: {
+                        id: true,
+                        email: true
+                    }
+                },
+                receiver: {
+                    select: {
+                        id: true,
+                        email: true
+                    }
+                }
+            }
+        });
+        const totalCount = await index_1.prisma.message.count({ where: whereClause });
+        res.json({
+            messages,
+            pagination: {
+                page,
+                limit,
+                total: totalCount,
+                pages: Math.ceil(totalCount / limit)
+            }
+        });
+    }
+    catch (error) {
+        console.error('Get admin messages error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+// Send email to user
+router.post('/users/:userId/send-email', auth_1.authenticate, requireAdmin, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { subject, htmlContent } = req.body;
+        if (!subject || !htmlContent) {
+            return res.status(400).json({ message: 'Subject and HTML content are required' });
+        }
+        const user = await index_1.prisma.user.findUnique({
+            where: { id: userId }
+        });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        // TODO: Implement email sending logic here using a service like SendGrid or Nodemailer
+        // For now, just log the email details
+        console.log(`Sending email to: ${user.email}`);
+        console.log(`Subject: ${subject}`);
+        console.log(`Content: ${htmlContent}`);
+        res.json({ message: 'Email sent successfully (not really, just a log)' });
+    }
+    catch (error) {
+        console.error('Send email error:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
