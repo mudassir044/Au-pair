@@ -1,3 +1,4 @@
+
 {
   "name": "au-pair-backend",
   "version": "1.0.0",
@@ -5,15 +6,20 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "tsc",
+    "build": "tsc && npx prisma generate",
     "start": "node dist/index.js",
     "postinstall": "npx prisma generate",
     "db:push": "npx prisma db push",
+    "db:migrate": "npx prisma migrate dev",
+    "db:studio": "npx prisma studio",
+    "db:seed": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "prisma:migrate": "prisma migrate dev",
-    "seed": "ts-node prisma/seed.ts"
+    "test": "echo \"No tests specified\" && exit 0",
+    "lint": "echo \"No linting configured\" && exit 0",
+    "production": "npm run build && npm start"
   },
   "dependencies": {
     "@prisma/client": "^6.11.0",
@@ -43,5 +49,9 @@
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

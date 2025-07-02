@@ -1,31 +1,34 @@
+
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../index';
 import { UserRole } from '@prisma/client';
 
 export interface AuthRequest extends Request {
-  userId?: string
   user?: {
-    id: string
-    email: string
-    role: string
-  }
-  header: (name: string) => string | undefined
-  body: any
-  params: any
-  query: any
-  file?: any
+    id: string;
+    email: string;
+    role: UserRole;
+  };
 }
 
-export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const authHeader = req.header('Authorization');
+    const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return res.status(401).json({ message: 'Access denied. No token provided.' });
+      res.status(401).json({ message: 'Access denied. No token provided.' });
+      return;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as any;
+    if (!process.env.JWT_ACCESS_SECRET) {
+      console.error('JWT_ACCESS_SECRET not configured');
+      res.status(500).json({ message: 'Server configuration error' });
+      return;
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET) as { userId: string };
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -33,7 +36,8 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     });
 
     if (!user || !user.isActive) {
-      return res.status(401).json({ message: 'Invalid token or user deactivated.' });
+      res.status(401).json({ message: 'Invalid token or user deactivated.' });
+      return;
     }
 
     req.user = {
@@ -44,18 +48,21 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
     next();
   } catch (error) {
+    console.error('Auth middleware error:', error);
     res.status(401).json({ message: 'Invalid token.' });
   }
 };
 
 export const roleMiddleware = (roles: UserRole[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      return res.status(401).json({ message: 'Access denied. Please authenticate.' });
+      res.status(401).json({ message: 'Access denied. Please authenticate.' });
+      return;
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+      res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+      return;
     }
 
     next();

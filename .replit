@@ -1,20 +1,11 @@
 modules = ["nodejs-20", "web"]
-run = "cd backend npm install npx prisma generate npx prisma db push npm run dev"
+run = "cd backend && npm install && npx prisma generate && npx prisma db push && npm run dev"
 
 [nix]
 channel = "stable-24_05"
 
 [workflows]
 runButton = "Start Backend"
-
-[[workflows.workflow]]
-name = "Start Frontend"
-author = 44507174
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd frontend && npm install && npm run dev"
 
 [[workflows.workflow]]
 name = "Start Backend"
@@ -26,8 +17,8 @@ task = "shell.exec"
 args = "cd backend && npm install && npx prisma generate && npx prisma db push && npm run dev"
 
 [[workflows.workflow]]
-name = "Deploy Backend"
-author = 44508950
+name = "Build and Start Production"
+author = 44507174
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
@@ -35,12 +26,9 @@ task = "shell.exec"
 args = "cd backend && npm install && npx prisma generate && npx prisma db push && npm run build && npm start"
 
 [[ports]]
-localPort = 3000
-externalPort = 3000
-
-[[ports]]
-localPort = 8001
+localPort = 5000
 externalPort = 80
 
 [deployment]
-run = ["sh", "-c", "cd backend npm install npx prisma generate npx prisma db push npm run dev"]
+run = ["sh", "-c", "cd backend && npm start"]
+build = ["sh", "-c", "cd backend && npm install && npx prisma generate && npx prisma db push && npm run build"]
