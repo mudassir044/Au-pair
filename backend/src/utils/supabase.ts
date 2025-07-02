@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import multer from 'multer';
-import { Request } from 'express';
+import * as Express from 'express';
 
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_ANON_KEY!;
@@ -15,7 +15,7 @@ export const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  fileFilter: (req: Request, file: Express.Multer.File, cb) => {
+  fileFilter: (req: Express.Request, file: Express.Multer.File, cb) => {
     // Allow common image and document formats
     const allowedMimes = [
       'image/jpeg',

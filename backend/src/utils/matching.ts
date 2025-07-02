@@ -181,3 +181,73 @@ export const findMatches = async (
     .sort((a, b) => b.matchScore - a.matchScore)
     .slice(0, limit);
 };
+import { UserRole } from '@prisma/client';
+import { prisma } from '../index';
+
+export interface MatchResult {
+  id: string;
+  matchScore: number;
+  profile: any;
+}
+
+export const findMatches = async (userId: string, userRole: UserRole): Promise<MatchResult[]> => {
+  try {
+    if (userRole === 'AU_PAIR') {
+      // Find host families for au pair
+      const hostFamilies = await prisma.user.findMany({
+        where: {
+          role: 'HOST_FAMILY',
+          isActive: true,
+          id: { not: userId }
+        },
+        include: {
+          hostFamilyProfile: true
+        }
+      });
+
+      return hostFamilies.map(host => ({
+        id: host.id,
+        matchScore: calculateMatchScore(userId, host.id, userRole),
+        profile: host.hostFamilyProfile
+      }));
+    } else if (userRole === 'HOST_FAMILY') {
+      // Find au pairs for host family
+      const auPairs = await prisma.user.findMany({
+        where: {
+          role: 'AU_PAIR',
+          isActive: true,
+          id: { not: userId }
+        },
+        include: {
+          auPairProfile: true
+        }
+      });
+
+      return auPairs.map(auPair => ({
+        id: auPair.id,
+        matchScore: calculateMatchScore(userId, auPair.id, userRole),
+        profile: auPair.auPairProfile
+      }));
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error finding matches:', error);
+    return [];
+  }
+};
+
+export const calculateMatchScore = (userId1: string, userId2: string, userRole: UserRole): number => {
+  // Basic match score calculation - can be enhanced with more sophisticated logic
+  let score = 50; // Base score
+
+  // Add random factor for now - in real implementation, this would be based on:
+  // - Location preferences
+  // - Language matches
+  // - Experience requirements
+  // - Budget compatibility
+  // - Availability overlap
+  score += Math.random() * 50;
+
+  return Math.round(score);
+};

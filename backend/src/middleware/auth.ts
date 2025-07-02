@@ -1,5 +1,7 @@
+
 import { Request, Response, NextFunction } from 'express';
-import { verifyJWT } from '../utils/jwt';
+import jwt from 'jsonwebtoken';
+import { prisma } from '../index';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -7,6 +9,10 @@ export interface AuthRequest extends Request {
     role: string;
     email: string;
   };
+  file?: Express.Multer.File;
+  body: any;
+  params: any;
+  query: any;
 }
 
 export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -17,7 +23,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as any;
 
     // Verify user still exists and is active
     const user = await prisma.user.findUnique({
