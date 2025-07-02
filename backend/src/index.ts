@@ -135,7 +135,7 @@ app.use((req, res) => {
 });
 
 // Start server
-server.listen(parseInt(PORT as string, 10), '0.0.0.0', () => {
+server.listen(parseInt(PORT as string, 10), () => {
   console.log(`🚀 Au-pair backend server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
   console.log(`🔗 Health check: http://0.0.0.0:${PORT}/health`);
