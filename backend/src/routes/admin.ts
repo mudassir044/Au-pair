@@ -129,8 +129,8 @@ router.get('/dashboard', async (req: AuthRequest, res) => {
 // Get all users with pagination and filters
 router.get('/users', async (req: AuthRequest, res) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
+    const page = parseInt(req.query.page as string) || 1;
     const offset = (page - 1) * limit;
     const role = req.query.role as string;
     const status = req.query.status as string;
@@ -176,7 +176,7 @@ router.get('/users', async (req: AuthRequest, res) => {
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
-      skip: (page - 1) * limit
+      skip: offset
     });
 
     const totalCount = await prisma.user.count({ where: whereClause });
@@ -230,8 +230,9 @@ router.put('/users/:userId/status', authenticate, requireAdmin, async (req: Requ
 // Get all matches with filters
 router.get('/matches', authenticate, requireAdmin, async (req: Request, res: Response) => {
   try {
+    const limit = parseInt(req.query.limit as string) || 10;
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = (page - 1) * limit;
     const status = req.query.status as string;
     const hostId = req.query.hostId as string;
     const auPairId = req.query.auPairId as string;
