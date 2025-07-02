@@ -2,3 +2,24 @@ modules = ["nodejs-20", "web"]
 
 [nix]
 channel = "stable-24_05"
+
+[workflows]
+runButton = "Start Backend"
+
+[[workflows.workflow]]
+name = "Start Frontend"
+author = 44507174
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm run dev"
+
+[[workflows.workflow]]
+name = "Start Backend"
+author = 44507174
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && npm install && npx prisma generate && npx prisma db push && npm run dev"

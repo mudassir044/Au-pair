@@ -4,7 +4,7 @@
   "description": "Au-pair application backend with Express, TypeScript, PostgreSQL, and Prisma",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "prisma:generate": "prisma generate",

@@ -26,6 +26,40 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 const server = createServer(app);
+
+const PORT = process.env.PORT || 5000;
+
+// Initialize Prisma
+export const prisma = new PrismaClient();
+
+// Middleware
+app.use(helmet());
+app.use(cors());
+app.use(morgan('combined'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Server is running' });
+});
+
+// Start server
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+const PORT = process.env.PORT || 5000;
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
