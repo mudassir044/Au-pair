@@ -9,7 +9,7 @@ import { PrismaClient } from '@prisma/client';
 // Import routes
 import authRoutes from './routes/auth-simple';
 import userRoutes from './routes/users-simple';
-// import profileRoutes from './routes/profiles';
+import profileRoutes from './routes/profiles';
 // import matchRoutes from './routes/matches';
 // import messageRoutes from './routes/messages';
 // import documentRoutes from './routes/documents';
@@ -63,7 +63,7 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-// app.use('/api/profiles', profileRoutes);
+app.use('/api/profiles', profileRoutes);
 // app.use('/api/matches', matchRoutes);
 // app.use('/api/messages', messageRoutes);
 // app.use('/api/documents', documentRoutes);
