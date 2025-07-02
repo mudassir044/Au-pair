@@ -162,7 +162,7 @@ router.post('/refresh', async (req, res) => {
     }
 
     const decoded = verifyRefreshToken(refreshToken);
-    
+
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: { id: true, isActive: true }
@@ -308,7 +308,7 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // Get current user
-router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
+router.get('/me', authenticate, async (req: AuthRequest, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
