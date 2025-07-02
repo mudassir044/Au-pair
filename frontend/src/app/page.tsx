@@ -8,7 +8,7 @@ export default function Home() {
   useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch('http://localhost:5000/health')
+        const response = await fetch('http://localhost:5000/api/health')
         const data = await response.json()
         setBackendStatus(`✅ ${data.message}`)
       } catch (error) {
