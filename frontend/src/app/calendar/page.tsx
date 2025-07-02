@@ -141,7 +141,7 @@ export default function CalendarPage() {
     const token = localStorage.getItem('accessToken')
 
     try {
-      const response = await fetch(`http://localhost:8001/api/calendar/bookings/${bookingId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/calendar/bookings/${bookingId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
