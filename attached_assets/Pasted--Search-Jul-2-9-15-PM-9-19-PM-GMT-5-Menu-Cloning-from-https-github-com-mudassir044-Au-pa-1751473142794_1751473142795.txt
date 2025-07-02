@@ -1,0 +1,45 @@
+
+Search
+
+Jul 2, 9:15 PM - 9:19 PM
+GMT+5
+
+Menu
+
+==> Cloning from https://github.com/mudassir044/Au-pair
+==> Checking out commit 9e089c07c24695a3e31f645ddef7a64c446823da in branch main
+==> Requesting Node.js version >=18.0.0
+==> Using Node.js version 24.3.0 via ./backend/package.json
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'cd backend && npm install && npx prisma generate && npx prisma db push && npm run build'...
+> au-pair-backend@1.0.0 postinstall
+> npx prisma generate
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 1.09s
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+added 152 packages, and audited 153 packages in 12s
+17 packages are looking for funding
+  run `npm fund` for details
+found 0 vulnerabilities
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 465ms
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+The database is already in sync with the Prisma schema.
+Running generate... (Use --skip-generate to skip the generators)
+Running generate... - Prisma Client
+✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 606ms
+> au-pair-backend@1.0.0 build
+> tsc && npx prisma generate
+src/middleware/auth.ts(19,25): error TS2713: Cannot access 'Multer.File' because 'Multer' is a type, but not a namespace. Did you mean to retrieve the type of the property 'File' in 'Multer' with 'Multer["File"]'?
+src/routes/admin.ts(268,13): error TS2304: Cannot find name 'offset'.
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
