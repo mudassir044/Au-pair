@@ -63,7 +63,7 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/profiles', profileRoutes);
+app.use('/api/profiles', authMiddleware, profileRoutes);
 // app.use('/api/matches', matchRoutes);
 // app.use('/api/messages', messageRoutes);
 // app.use('/api/documents', documentRoutes);
