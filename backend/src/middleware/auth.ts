@@ -1,43 +1,33 @@
-
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../index';
-import { UserRole } from '@prisma/client';
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
     email: string;
-    role: UserRole;
+    role: string;
   };
 }
 
-export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const authHeader = req.header('Authorization');
-    const token = authHeader?.replace('Bearer ', '');
+    const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
-      res.status(401).json({ message: 'Access denied. No token provided.' });
-      return;
+      return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
-    if (!process.env.JWT_ACCESS_SECRET) {
-      console.error('JWT_ACCESS_SECRET not configured');
-      res.status(500).json({ message: 'Server configuration error' });
-      return;
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
 
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET) as { userId: string };
-
+    // Verify user still exists and is active
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: { id: true, email: true, role: true, isActive: true }
     });
 
     if (!user || !user.isActive) {
-      res.status(401).json({ message: 'Invalid token or user deactivated.' });
-      return;
+      return res.status(401).json({ message: 'Invalid token or user inactive.' });
     }
 
     req.user = {
@@ -48,21 +38,18 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
     res.status(401).json({ message: 'Invalid token.' });
   }
 };
 
-export const roleMiddleware = (roles: UserRole[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const authorize = (...roles: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
-      res.status(401).json({ message: 'Access denied. Please authenticate.' });
-      return;
+      return res.status(401).json({ message: 'Authentication required.' });
     }
 
     if (!roles.includes(req.user.role)) {
-      res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
-      return;
+      return res.status(403).json({ message: 'Insufficient permissions.' });
     }
 
     next();

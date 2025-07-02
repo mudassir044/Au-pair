@@ -1,3 +1,4 @@
+
 // This is your Prisma schema file
 generator client {
   provider = "prisma-client-js"
@@ -61,8 +62,8 @@ model User {
   documents          Document[]
   sentMessages       Message[] @relation("MessageSender")
   receivedMessages   Message[] @relation("MessageReceiver")
-  requesterBookings  Booking[] @relation("RequesterBookings")
-  receiverBookings   Booking[] @relation("ReceiverBookings")
+  auPairBookings     Booking[] @relation("AuPairBookings")
+  hostBookings       Booking[] @relation("HostBookings")
   hostMatches        Match[]   @relation("HostMatches")
   auPairMatches      Match[]   @relation("AuPairMatches")
   availability       Availability[]
@@ -191,28 +192,24 @@ model Availability {
   @@map("availability")
 }
 
-enum BookingType {
-  INTERVIEW
-  TRIAL_PERIOD
-  CONSULTATION
-}
-
 model Booking {
   id            String        @id @default(uuid())
-  requesterId   String
-  receiverId    String
-  scheduledDate DateTime
-  scheduledTime String
-  duration      Int           @default(60)
-  bookingType   BookingType   @default(INTERVIEW)
+  auPairId      String
+  hostId        String
+  startDate     DateTime
+  endDate       DateTime
+  totalHours    Float?
+  hourlyRate    Float?
+  totalAmount   Float?
+  currency      String        @default("USD")
   status        BookingStatus @default(PENDING)
   notes         String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
   // Relations
-  requester User @relation("RequesterBookings", fields: [requesterId], references: [id], onDelete: Cascade)
-  receiver  User @relation("ReceiverBookings", fields: [receiverId], references: [id], onDelete: Cascade)
+  auPair User @relation("AuPairBookings", fields: [auPairId], references: [id], onDelete: Cascade)
+  host   User @relation("HostBookings", fields: [hostId], references: [id], onDelete: Cascade)
 
   @@map("bookings")
 }
