@@ -1,0 +1,66 @@
+Mission: Finish building the entire full-stack Au Pair ↔ Host Family platform.
+
+Your job is to complete every remaining component, test it, and only return the final result once everything is fully functional — frontend, backend, real-time messaging, auth, profiles, matches, and all routes.
+
+✅ Current foundation:
+- Backend: Express + Prisma + JWT + Supabase (file storage) + Nodemailer
+- Frontend: Next.js + Tailwind + Socket.io
+- Authentication, onboarding, and matchmaking are partially done
+
+🎯 Your goal:
+1. Finish all incomplete backend routes and DB logic:
+   - Match request saving (avoid duplicates)
+   - Message DB schema and socket logic
+   - Booking/calendar system (simple availability and request)
+   - Document upload support (PDF/ID via Supabase)
+
+2. Implement these frontend pages fully:
+   - `/matches`: Real cards, compatibility scores, Send Request buttons
+   - `/messages`: Real-time chat UI (socket.io), full layout
+   - `/calendar`: Availability viewer and booking scheduler
+   - `/documents`: Upload and view documents securely
+   - `/admin`: Admin dashboard (moderate users, match approvals)
+
+3. Enhance UI/UX with Tailwind:
+   - Chat bubbles with avatars, timestamps
+   - Calendar UI with date pickers
+   - Booking confirmations
+   - Show helpful tooltips and status banners
+
+4. Real-time messaging via Socket.io:
+   - Store and display live chat per match
+   - Maintain rooms
+   - Show unread badge on new messages
+
+5. Final polish:
+   - Fix all TypeScript errors (no red squiggles)
+   - Secure all API endpoints with proper auth
+   - Handle edge cases (no profile, no matches, blocked user, etc.)
+   - Add proper 404 and 500 pages
+   - Ensure mobile responsiveness
+
+6. Testing:
+   - Perform full test flow with dummy data
+   - Run backend health checks (`/api/health`)
+   - Log in with two test users and verify full match → request → message → book flow
+   - Validate real-time message delivery and DB saving
+
+🔐 Security:
+- Sanitize all inputs
+- Protect all auth-required routes
+- Implement basic rate limiting
+- Comply with GDPR (placeholder notice is fine)
+
+🧠 You must:
+- Think like a senior engineer
+- Handle state, roles (Au Pair vs Host), and auth conditions
+- Keep code clean, reusable, and documented
+
+📦 Final Deliverable:
+- Frontend and backend fully working
+- Pushed to GitHub repo
+- Tested and verified
+- Provide the Netlify (frontend) and Render (backend) links
+- Output ONLY when the system is fully functional
+
+Do not return anything until this system is DONE and working end-to-end.
