@@ -1,11 +1,11 @@
 import express from 'express';
 import { prisma } from '../index';
-import { AuthRequest, authMiddleware } from '../middleware/auth';
+import { AuthRequest, authenticate } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // Apply auth middleware to all routes
-router.use(authMiddleware);
+router.use(authenticate);
 
 // Get all users (for admin)
 router.get('/', async (req: AuthRequest, res) => {
