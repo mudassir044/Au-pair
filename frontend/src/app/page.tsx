@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -307,6 +306,9 @@ export default function Home() {
                   <>
                     <li><a href="/dashboard" className="hover:text-white transition-colors">Dashboard</a></li>
                     <li><a href="/matches" className="hover:text-white transition-colors">Find Matches</a></li>
+                    <a href="/messages" className="text-white hover:text-blue-100">Messages</a>
+                    <a href="/calendar" className="text-white hover:text-blue-100">Calendar</a>
+                    <a href="/documents" className="text-white hover:text-blue-100">Documents</a>
                   </>
                 )}
               </ul>

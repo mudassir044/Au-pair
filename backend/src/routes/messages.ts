@@ -81,7 +81,7 @@ router.get('/conversations', async (req: AuthRequest, res) => {
 });
 
 // Get messages between current user and another user
-router.get('/conversation/:userId', async (req: AuthRequest, res) => {
+router.get('/:userId', async (req: AuthRequest, res) => {
   try {
     const currentUserId = req.user!.id;
     const { userId: otherUserId } = req.params;

@@ -20,14 +20,6 @@ enum MatchStatus {
   REJECTED
 }
 
-enum BookingStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  COMPLETED
-  CANCELLED
-}
-
 enum DocumentStatus {
   PENDING
   VERIFIED

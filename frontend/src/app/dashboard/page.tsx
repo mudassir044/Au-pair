@@ -237,6 +237,20 @@ export default function DashboardPage() {
                 <div className="font-medium text-green-900">Messages</div>
                 <div className="text-sm text-green-600">Chat with potential matches</div>
               </button>
+              <button
+                onClick={() => router.push('/calendar')}
+                className="w-full text-left px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+              >
+                <div className="font-medium text-purple-900">Calendar</div>
+                <div className="text-sm text-purple-600">Manage bookings and availability</div>
+              </button>
+              <button
+                onClick={() => router.push('/documents')}
+                className="w-full text-left px-4 py-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors"
+              >
+                <div className="font-medium text-orange-900">Documents</div>
+                <div className="text-sm text-orange-600">Upload verification documents</div>
+              </button>
             </div>
           </div>
 

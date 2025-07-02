@@ -12,8 +12,9 @@ import userRoutes from './routes/users-simple';
 import profilesRoutes from './routes/profiles';
 import matchesRoutes from './routes/matches';
 import messagesRoutes from './routes/messages';
-import bookingsRoutes from './routes/bookings';
 import documentsRoutes from './routes/documents';
+import bookingsRoutes from './routes/bookings';
+import calendarRoutes from './routes/calendar';
 import adminRoutes from './routes/admin';
 
 // Import middleware
@@ -68,6 +69,7 @@ app.use('/api/matches', matchesRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/bookings', bookingsRoutes);
+app.use('/api/calendar', calendarRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Socket.io setup
