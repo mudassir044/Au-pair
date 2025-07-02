@@ -9,12 +9,12 @@ import { PrismaClient } from '@prisma/client';
 // Import routes
 import authRoutes from './routes/auth-simple';
 import userRoutes from './routes/users-simple';
-import profileRoutes from './routes/profiles';
-// import matchRoutes from './routes/matches';
-// import messageRoutes from './routes/messages';
-// import documentRoutes from './routes/documents';
-// import bookingRoutes from './routes/bookings';
-// import adminRoutes from './routes/admin';
+import profilesRoutes from './routes/profiles';
+import matchesRoutes from './routes/matches';
+import messagesRoutes from './routes/messages';
+import bookingsRoutes from './routes/bookings';
+import documentsRoutes from './routes/documents';
+import adminRoutes from './routes/admin';
 
 // Import middleware
 import { authMiddleware } from './middleware/auth';
@@ -63,12 +63,12 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/profiles', authMiddleware, profileRoutes);
-// app.use('/api/matches', matchRoutes);
-// app.use('/api/messages', messageRoutes);
-// app.use('/api/documents', documentRoutes);
-// app.use('/api/bookings', bookingRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/profiles', authMiddleware, profilesRoutes);
+app.use('/api/matches', matchesRoutes);
+app.use('/api/messages', messagesRoutes);
+app.use('/api/documents', documentsRoutes);
+app.use('/api/bookings', bookingsRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Socket.io setup
 // setupSocketHandlers(io);
