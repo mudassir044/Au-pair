@@ -35,7 +35,7 @@ export const upload = multer({
 });
 
 export const uploadToSupabase = async (
-  file: Express.Multer.File,
+  file: any,
   bucket: string,
   filename: string
 ): Promise<{ url: string | null; error: any }> => {
@@ -68,7 +68,7 @@ export const deleteFromSupabase = async (url: string): Promise<void> => {
     if (urlParts.length < 2) {
       throw new Error('Invalid file URL');
     }
-    
+
     const filePath = urlParts[1];
 
     const { error } = await supabase.storage

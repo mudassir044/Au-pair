@@ -140,7 +140,7 @@ router.post('/', async (req: AuthRequest, res) => {
         hostId: userRole === 'HOST_FAMILY' ? userId : targetUserId,
         auPairId: userRole === 'AU_PAIR' ? userId : targetUserId,
         matchScore,
-        initiatedBy: userRole,
+        initiatedBy: userRole as 'AU_PAIR' | 'HOST_FAMILY',
         notes,
         status: 'PENDING'
       },

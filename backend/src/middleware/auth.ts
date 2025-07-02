@@ -1,18 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { prisma } from '../index';
+import { verifyJWT } from '../utils/jwt';
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    email: string;
     role: string;
+    email: string;
   };
 }
 
 export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const token = req.headers.authorization?.replace('Bearer ', '');
 
     if (!token) {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
