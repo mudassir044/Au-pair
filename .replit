@@ -25,6 +25,15 @@ mode = "sequential"
 task = "shell.exec"
 args = "cd backend && npm install && npx prisma generate && npx prisma db push && npm run dev"
 
+[[workflows.workflow]]
+name = "Deploy Backend"
+author = 44508950
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && npm install && npx prisma generate && npx prisma db push && npm run build && npm start"
+
 [[ports]]
 localPort = 3000
 externalPort = 3000

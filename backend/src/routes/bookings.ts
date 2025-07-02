@@ -151,7 +151,7 @@ router.get('/my-bookings', async (req: AuthRequest, res) => {
     const upcoming = req.query.upcoming === 'true';
 
     const whereClause: any = {};
-    
+
     if (userRole === 'AU_PAIR') {
       whereClause.auPairId = userId;
     } else if (userRole === 'HOST_FAMILY') {

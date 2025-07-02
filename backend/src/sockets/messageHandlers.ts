@@ -208,8 +208,14 @@ export const setupSocketHandlers = (io: Server) => {
   });
 };
 
-export { handleConnection };
+export {};
 
 export const setupMessageHandlers = (io: any) => {
-  io.on('connection', handleConnection);
+  io.on('connection', (socket: Socket) => {
+    console.log(`User connected`);
+
+    socket.on('disconnect', () => {
+      console.log(`User disconnected`);
+    });
+  });
 };

@@ -4,11 +4,17 @@ import { prisma } from '../index';
 import { UserRole } from '@prisma/client';
 
 export interface AuthRequest extends Request {
+  userId?: string
   user?: {
-    id: string;
-    email: string;
-    role: UserRole;
-  };
+    id: string
+    email: string
+    role: string
+  }
+  header: (name: string) => string | undefined
+  body: any
+  params: any
+  query: any
+  file?: any
 }
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -20,7 +26,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     }
 
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as any;
-    
+
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       select: { id: true, email: true, role: true, isActive: true }
