@@ -1,4 +1,3 @@
-
 import express from 'express';
 import { prisma } from '../index';
 import { AuthRequest } from '../middleware/auth';
@@ -9,7 +8,7 @@ const router = express.Router();
 router.get('/availability', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
-    
+
     const availability = await prisma.availability.findMany({
       where: { userId },
       orderBy: { date: 'asc' }
@@ -74,7 +73,7 @@ router.post('/availability', async (req: AuthRequest, res) => {
 router.get('/bookings', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
-    
+
     const bookings = await prisma.booking.findMany({
       where: {
         OR: [
@@ -166,11 +165,10 @@ router.post('/bookings', async (req: AuthRequest, res) => {
         status: 'PENDING'
       },
       include: {
-        requester: {
+        user: {
           select: {
             id: true,
             email: true,
-            role: true,
             auPairProfile: {
               select: { firstName: true, lastName: true }
             },
@@ -236,11 +234,10 @@ router.put('/bookings/:bookingId', async (req: AuthRequest, res) => {
         notes: notes || booking.notes
       },
       include: {
-        requester: {
+        user: {
           select: {
             id: true,
             email: true,
-            role: true,
             auPairProfile: {
               select: { firstName: true, lastName: true }
             },

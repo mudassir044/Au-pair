@@ -36,10 +36,12 @@ export const upload = multer({
 
 export const uploadToSupabase = async (
   file: any,
-  bucket: string,
-  filename: string
-): Promise<{ url: string | null; error: any }> => {
+  userId: string,
+  bucket: string
+): Promise<string> => {
   try {
+    const filename = `${userId}/${Date.now()}_${file.originalname}`;
+    
     const { data, error } = await supabase.storage
       .from(bucket)
       .upload(filename, file.buffer, {
@@ -48,16 +50,16 @@ export const uploadToSupabase = async (
       });
 
     if (error) {
-      return { url: null, error };
+      throw new Error(`Upload failed: ${error.message}`);
     }
 
     const { data: urlData } = supabase.storage
       .from(bucket)
       .getPublicUrl(filename);
 
-    return { url: urlData.publicUrl, error: null };
+    return urlData.publicUrl;
   } catch (error) {
-    return { url: null, error };
+    throw error;
   }
 };
 

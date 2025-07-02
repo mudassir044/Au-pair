@@ -131,10 +131,11 @@ router.get('/users', async (req: AuthRequest, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
+    const offset = (page - 1) * limit;
     const role = req.query.role as string;
     const status = req.query.status as string;
     const search = req.query.search as string;
-    const offset = (page - 1) * limit;
+
 
     const whereClause: any = {};
 
