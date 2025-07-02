@@ -263,7 +263,7 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 // Get current user
-router.get('/me', auth_1.authMiddleware, async (req, res) => {
+router.get('/me', auth_1.authenticate, async (req, res) => {
     try {
         const user = await index_1.prisma.user.findUnique({
             where: { id: req.user.id },

@@ -6,51 +6,52 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteFromSupabase = exports.uploadToSupabase = exports.upload = exports.supabase = void 0;
 const supabase_js_1 = require("@supabase/supabase-js");
 const multer_1 = __importDefault(require("multer"));
-// Initialize Supabase client with anonymous access for development
-const supabaseUrl = process.env.SUPABASE_URL || 'https://demo-project.supabase.co';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'demo-key';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
 exports.supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseKey);
-// Multer configuration for file uploads
+// Configure multer for file uploads
+const storage = multer_1.default.memoryStorage();
 exports.upload = (0, multer_1.default)({
-    storage: multer_1.default.memoryStorage(),
+    storage,
     limits: {
         fileSize: 10 * 1024 * 1024, // 10MB limit
     },
     fileFilter: (req, file, cb) => {
-        // Allow images and PDFs
-        if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
+        // Allow common image and document formats
+        const allowedMimes = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+        if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);
         }
         else {
-            cb(new Error('Only images and PDF files are allowed'));
+            cb(new Error('Invalid file type'));
         }
-    },
+    }
 });
-const uploadToSupabase = async (file, userId, folder = 'documents') => {
+const uploadToSupabase = async (file, bucket, filename) => {
     try {
-        const fileExtension = file.originalname.split('.').pop();
-        const fileName = `${userId}/${Date.now()}.${fileExtension}`;
-        const filePath = `${folder}/${fileName}`;
         const { data, error } = await exports.supabase.storage
-            .from('uploads')
-            .upload(filePath, file.buffer, {
+            .from(bucket)
+            .upload(filename, file.buffer, {
             contentType: file.mimetype,
-            cacheControl: '3600',
-            upsert: false
+            upsert: true
         });
         if (error) {
-            console.error('Supabase upload error:', error);
-            throw new Error(`Upload failed: ${error.message}`);
+            return { url: null, error };
         }
-        // Get public URL
-        const { data: { publicUrl } } = exports.supabase.storage
-            .from('uploads')
-            .getPublicUrl(filePath);
-        return publicUrl;
+        const { data: urlData } = exports.supabase.storage
+            .from(bucket)
+            .getPublicUrl(filename);
+        return { url: urlData.publicUrl, error: null };
     }
     catch (error) {
-        console.error('File upload error:', error);
-        throw error;
+        return { url: null, error };
     }
 };
 exports.uploadToSupabase = uploadToSupabase;
