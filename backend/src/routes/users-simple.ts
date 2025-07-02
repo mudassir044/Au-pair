@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
 import { prisma } from '../index';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
 
 // Get all users (simple endpoint)
-router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -25,7 +25,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 });
 
 // Get current user
-router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
