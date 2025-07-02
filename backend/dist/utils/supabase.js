@@ -76,3 +76,4 @@ const deleteFromSupabase = async (url) => {
     }
 };
 exports.deleteFromSupabase = deleteFromSupabase;
+//# sourceMappingURL=supabase.js.map

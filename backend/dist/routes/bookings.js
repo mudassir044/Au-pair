@@ -429,3 +429,4 @@ router.get('/au-pair/:auPairId/availability', async (req, res) => {
     }
 });
 exports.default = router;
+//# sourceMappingURL=bookings.js.map

@@ -268,3 +268,4 @@ router.get('/all', async (req, res) => {
     }
 });
 exports.default = router;
+//# sourceMappingURL=documents.js.map

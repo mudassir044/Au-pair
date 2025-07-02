@@ -372,3 +372,4 @@ router.post('/users/create-admin', async (req, res) => {
     }
 });
 exports.default = router;
+//# sourceMappingURL=admin.js.map

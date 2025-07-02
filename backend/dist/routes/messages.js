@@ -76,7 +76,7 @@ router.get('/conversations', async (req, res) => {
     }
 });
 // Get messages between current user and another user
-router.get('/conversation/:userId', async (req, res) => {
+router.get('/:userId', async (req, res) => {
     try {
         const currentUserId = req.user.id;
         const { userId: otherUserId } = req.params;
@@ -259,3 +259,4 @@ router.delete('/:messageId', async (req, res) => {
     }
 });
 exports.default = router;
+//# sourceMappingURL=messages.js.map

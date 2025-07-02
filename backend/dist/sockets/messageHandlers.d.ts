@@ -1,2 +1,3 @@
 import { Server } from 'socket.io';
-export declare const setupSocketHandlers: (io: Server) => void;
+export declare const setupMessageHandlers: (io: Server) => void;
+//# sourceMappingURL=messageHandlers.d.ts.map

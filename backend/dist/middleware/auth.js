@@ -8,9 +8,16 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_1 = require("../index");
 const authMiddleware = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const authHeader = req.header('Authorization');
+        const token = authHeader?.replace('Bearer ', '');
         if (!token) {
-            return res.status(401).json({ message: 'Access denied. No token provided.' });
+            res.status(401).json({ message: 'Access denied. No token provided.' });
+            return;
+        }
+        if (!process.env.JWT_ACCESS_SECRET) {
+            console.error('JWT_ACCESS_SECRET not configured');
+            res.status(500).json({ message: 'Server configuration error' });
+            return;
         }
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_ACCESS_SECRET);
         const user = await index_1.prisma.user.findUnique({
@@ -18,7 +25,8 @@ const authMiddleware = async (req, res, next) => {
             select: { id: true, email: true, role: true, isActive: true }
         });
         if (!user || !user.isActive) {
-            return res.status(401).json({ message: 'Invalid token or user deactivated.' });
+            res.status(401).json({ message: 'Invalid token or user deactivated.' });
+            return;
         }
         req.user = {
             id: user.id,
@@ -28,6 +36,7 @@ const authMiddleware = async (req, res, next) => {
         next();
     }
     catch (error) {
+        console.error('Auth middleware error:', error);
         res.status(401).json({ message: 'Invalid token.' });
     }
 };
@@ -35,12 +44,15 @@ exports.authMiddleware = authMiddleware;
 const roleMiddleware = (roles) => {
     return (req, res, next) => {
         if (!req.user) {
-            return res.status(401).json({ message: 'Access denied. Please authenticate.' });
+            res.status(401).json({ message: 'Access denied. Please authenticate.' });
+            return;
         }
         if (!roles.includes(req.user.role)) {
-            return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+            res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+            return;
         }
         next();
     };
 };
 exports.roleMiddleware = roleMiddleware;
+//# sourceMappingURL=auth.js.map

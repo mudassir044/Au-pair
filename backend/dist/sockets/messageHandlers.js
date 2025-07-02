@@ -3,79 +3,61 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setupSocketHandlers = void 0;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+exports.setupMessageHandlers = void 0;
 const index_1 = require("../index");
-const setupSocketHandlers = (io) => {
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const setupMessageHandlers = (io) => {
     // Authentication middleware for socket connections
     io.use(async (socket, next) => {
         try {
-            const token = socket.handshake.auth.token;
+            const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.replace('Bearer ', '');
             if (!token) {
                 return next(new Error('Authentication error: No token provided'));
+            }
+            if (!process.env.JWT_ACCESS_SECRET) {
+                return next(new Error('Server configuration error'));
             }
             const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_ACCESS_SECRET);
             const user = await index_1.prisma.user.findUnique({
                 where: { id: decoded.userId },
-                select: { id: true, role: true, isActive: true }
+                select: { id: true, isActive: true }
             });
             if (!user || !user.isActive) {
                 return next(new Error('Authentication error: Invalid user'));
             }
             socket.userId = user.id;
-            socket.userRole = user.role;
             next();
         }
         catch (error) {
-            next(new Error('Authentication error: Invalid token'));
+            console.error('Socket authentication error:', error);
+            next(new Error('Authentication error'));
         }
     });
     io.on('connection', (socket) => {
         console.log(`User ${socket.userId} connected to socket`);
         // Join user to their personal room
-        socket.join(`user_${socket.userId}`);
-        // Handle joining conversation rooms
-        socket.on('join_conversation', (data) => {
-            const { receiverId } = data;
-            const roomId = [socket.userId, receiverId].sort().join('_');
-            socket.join(roomId);
-            console.log(`User ${socket.userId} joined conversation room: ${roomId}`);
-        });
-        // Handle leaving conversation rooms
-        socket.on('leave_conversation', (data) => {
-            const { receiverId } = data;
-            const roomId = [socket.userId, receiverId].sort().join('_');
-            socket.leave(roomId);
-            console.log(`User ${socket.userId} left conversation room: ${roomId}`);
-        });
+        if (socket.userId) {
+            socket.join(`user:${socket.userId}`);
+        }
         // Handle sending messages
         socket.on('send_message', async (data) => {
             try {
-                const { receiverId, content } = data;
-                if (!receiverId || !content?.trim()) {
-                    socket.emit('error', { message: 'Invalid message data' });
+                if (!socket.userId) {
+                    socket.emit('error', { message: 'Not authenticated' });
                     return;
                 }
-                // Verify receiver exists and both users can communicate
+                const { receiverId, content } = data;
+                if (!receiverId || !content?.trim()) {
+                    socket.emit('error', { message: 'Receiver ID and content are required' });
+                    return;
+                }
+                // Verify receiver exists
                 const receiver = await index_1.prisma.user.findUnique({
                     where: { id: receiverId },
                     select: { id: true, isActive: true }
                 });
                 if (!receiver || !receiver.isActive) {
                     socket.emit('error', { message: 'Receiver not found or inactive' });
-                    return;
-                }
-                // Check if users have an approved match (optional business logic)
-                const existingMatch = await index_1.prisma.match.findFirst({
-                    where: {
-                        OR: [
-                            { hostId: socket.userId, auPairId: receiverId, status: 'APPROVED' },
-                            { hostId: receiverId, auPairId: socket.userId, status: 'APPROVED' }
-                        ]
-                    }
-                });
-                if (!existingMatch) {
-                    socket.emit('error', { message: 'You can only message users you have a match with' });
                     return;
                 }
                 // Create message in database
@@ -90,56 +72,47 @@ const setupSocketHandlers = (io) => {
                             select: {
                                 id: true,
                                 email: true,
-                                role: true,
                                 auPairProfile: {
-                                    select: { firstName: true, lastName: true, profilePhotoUrl: true }
+                                    select: { firstName: true, lastName: true }
                                 },
                                 hostFamilyProfile: {
-                                    select: { familyName: true, contactPersonName: true, profilePhotoUrl: true }
+                                    select: { familyName: true, contactPersonName: true }
                                 }
                             }
                         }
                     }
                 });
-                const roomId = [socket.userId, receiverId].sort().join('_');
-                // Emit to conversation room
-                io.to(roomId).emit('new_message', {
+                // Emit to sender (confirmation)
+                socket.emit('message_sent', {
                     id: message.id,
                     content: message.content,
-                    senderId: message.senderId,
                     receiverId: message.receiverId,
-                    createdAt: message.createdAt,
-                    sender: message.sender
+                    createdAt: message.createdAt
                 });
-                // Emit notification to receiver's personal room
-                io.to(`user_${receiverId}`).emit('message_notification', {
-                    messageId: message.id,
-                    senderId: socket.userId,
-                    senderName: message.sender.role === 'AU_PAIR'
-                        ? `${message.sender.auPairProfile?.firstName} ${message.sender.auPairProfile?.lastName}`
-                        : message.sender.hostFamilyProfile?.contactPersonName,
-                    preview: content.length > 50 ? content.substring(0, 47) + '...' : content
+                // Emit to receiver (if online)
+                socket.to(`user:${receiverId}`).emit('new_message', {
+                    id: message.id,
+                    senderId: message.senderId,
+                    senderName: message.sender.auPairProfile
+                        ? `${message.sender.auPairProfile.firstName} ${message.sender.auPairProfile.lastName}`
+                        : message.sender.hostFamilyProfile?.contactPersonName || message.sender.email,
+                    content: message.content,
+                    createdAt: message.createdAt
                 });
+                console.log(`Message sent from ${socket.userId} to ${receiverId}`);
             }
             catch (error) {
                 console.error('Send message error:', error);
                 socket.emit('error', { message: 'Failed to send message' });
             }
         });
-        // Handle typing indicators
-        socket.on('typing_start', (data) => {
-            const { receiverId } = data;
-            const roomId = [socket.userId, receiverId].sort().join('_');
-            socket.to(roomId).emit('user_typing', { userId: socket.userId });
-        });
-        socket.on('typing_stop', (data) => {
-            const { receiverId } = data;
-            const roomId = [socket.userId, receiverId].sort().join('_');
-            socket.to(roomId).emit('user_stopped_typing', { userId: socket.userId });
-        });
         // Handle marking messages as read
         socket.on('mark_messages_read', async (data) => {
             try {
+                if (!socket.userId) {
+                    socket.emit('error', { message: 'Not authenticated' });
+                    return;
+                }
                 const { senderId } = data;
                 await index_1.prisma.message.updateMany({
                     where: {
@@ -151,32 +124,23 @@ const setupSocketHandlers = (io) => {
                         isRead: true
                     }
                 });
-                // Notify sender that messages were read
-                io.to(`user_${senderId}`).emit('messages_marked_read', {
-                    readBy: socket.userId
-                });
+                socket.emit('messages_marked_read', { senderId });
             }
             catch (error) {
                 console.error('Mark messages read error:', error);
                 socket.emit('error', { message: 'Failed to mark messages as read' });
             }
         });
-        // Handle getting online users (for a conversation)
-        socket.on('get_online_status', (data) => {
-            const { userIds } = data;
-            const onlineUsers = [];
-            userIds.forEach(userId => {
-                const userSockets = io.sockets.adapter.rooms.get(`user_${userId}`);
-                if (userSockets && userSockets.size > 0) {
-                    onlineUsers.push(userId);
-                }
-            });
-            socket.emit('online_status', { onlineUsers });
+        // Handle disconnect
+        socket.on('disconnect', (reason) => {
+            console.log(`User ${socket.userId} disconnected: ${reason}`);
         });
-        // Handle disconnection
-        socket.on('disconnect', () => {
-            console.log(`User ${socket.userId} disconnected from socket`);
+        // Handle connection errors
+        socket.on('error', (error) => {
+            console.error(`Socket error for user ${socket.userId}:`, error);
         });
     });
+    console.log('🔌 Socket.io message handlers initialized');
 };
-exports.setupSocketHandlers = setupSocketHandlers;
+exports.setupMessageHandlers = setupMessageHandlers;
+//# sourceMappingURL=messageHandlers.js.map

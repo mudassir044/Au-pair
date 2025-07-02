@@ -306,3 +306,4 @@ router.get('/me', auth_1.authMiddleware, async (req, res) => {
     }
 });
 exports.default = router;
+//# sourceMappingURL=auth.js.map

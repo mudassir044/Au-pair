@@ -246,3 +246,4 @@ router.delete('/:matchId', async (req, res) => {
     }
 });
 exports.default = router;
+//# sourceMappingURL=matches.js.map
