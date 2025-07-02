@@ -2,6 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../index';
 
+declare global {
+  namespace Express {
+    interface Multer {
+      File: any;
+    }
+  }
+}
+
 export interface AuthRequest extends Request {
   user?: {
     id: string;

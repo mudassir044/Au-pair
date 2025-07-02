@@ -176,7 +176,7 @@ router.get('/users', async (req: AuthRequest, res) => {
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
-      skip: offset
+      skip: (page - 1) * limit
     });
 
     const totalCount = await prisma.user.count({ where: whereClause });
