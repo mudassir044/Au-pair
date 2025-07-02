@@ -5,10 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = require("../index");
-const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
 // Apply admin role middleware to all routes
-router.use((0, auth_1.roleMiddleware)(['ADMIN']));
+router.use(roleMiddleware(['ADMIN']));
 // Get dashboard statistics
 router.get('/dashboard', async (req, res) => {
     try {

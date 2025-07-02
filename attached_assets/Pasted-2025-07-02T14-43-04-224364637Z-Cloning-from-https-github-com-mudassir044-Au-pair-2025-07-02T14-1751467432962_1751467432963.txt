@@ -1,0 +1,134 @@
+2025-07-02T14:43:04.224364637Z ==> Cloning from https://github.com/mudassir044/Au-pair
+2025-07-02T14:43:04.751307062Z ==> Checking out commit 62304a5f16b6e0d5b448f763386d6fa5969091d3 in branch main
+2025-07-02T14:43:06.284936999Z ==> Requesting Node.js version >=18.0.0
+2025-07-02T14:43:06.537852906Z ==> Using Node.js version 24.3.0 via ./backend/package.json
+2025-07-02T14:43:06.563165804Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-07-02T14:43:08.553163739Z ==> Using Bun version 1.1.0 (default)
+2025-07-02T14:43:08.553181469Z ==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+2025-07-02T14:43:08.616635384Z ==> Running build command 'cd backend && npm install && npx prisma generate && npx prisma db push && npm run build'...
+2025-07-02T14:43:13.346695498Z 
+2025-07-02T14:43:13.346731559Z > au-pair-backend@1.0.0 postinstall
+2025-07-02T14:43:13.346736349Z > npx prisma generate
+2025-07-02T14:43:13.346738529Z 
+2025-07-02T14:43:14.411623683Z Environment variables loaded from .env
+2025-07-02T14:43:14.412958297Z Prisma schema loaded from prisma/schema.prisma
+2025-07-02T14:43:14.621869358Z 
+2025-07-02T14:43:14.621896428Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 97ms
+2025-07-02T14:43:14.621899199Z 
+2025-07-02T14:43:14.621901588Z Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2025-07-02T14:43:14.621903649Z 
+2025-07-02T14:43:14.621907819Z Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+2025-07-02T14:43:14.621913089Z 
+2025-07-02T14:43:14.702637596Z 
+2025-07-02T14:43:14.702660167Z added 152 packages, and audited 153 packages in 6s
+2025-07-02T14:43:14.702667827Z 
+2025-07-02T14:43:14.702672637Z 17 packages are looking for funding
+2025-07-02T14:43:14.702690588Z   run `npm fund` for details
+2025-07-02T14:43:14.703853198Z 
+2025-07-02T14:43:14.703864338Z found 0 vulnerabilities
+2025-07-02T14:43:15.74562719Z Environment variables loaded from .env
+2025-07-02T14:43:15.747107878Z Prisma schema loaded from prisma/schema.prisma
+2025-07-02T14:43:15.953173556Z 
+2025-07-02T14:43:15.953196466Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 87ms
+2025-07-02T14:43:15.953199016Z 
+2025-07-02T14:43:15.953201406Z Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2025-07-02T14:43:15.953203557Z 
+2025-07-02T14:43:15.953205917Z Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+2025-07-02T14:43:15.953208087Z 
+2025-07-02T14:43:16.908168526Z Environment variables loaded from .env
+2025-07-02T14:43:16.909282924Z Prisma schema loaded from prisma/schema.prisma
+2025-07-02T14:43:16.91186732Z Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+2025-07-02T14:43:16.941219642Z 
+2025-07-02T14:43:16.941237413Z The database is already in sync with the Prisma schema.
+2025-07-02T14:43:16.941406357Z 
+2025-07-02T14:43:16.942150366Z Running generate... (Use --skip-generate to skip the generators)
+2025-07-02T14:43:17.039247943Z Running generate... - Prisma Client
+2025-07-02T14:43:17.13165566Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 92ms
+2025-07-02T14:43:17.131808824Z 
+2025-07-02T14:43:17.265477828Z 
+2025-07-02T14:43:17.265499598Z > au-pair-backend@1.0.0 build
+2025-07-02T14:43:17.265502378Z > tsc && npx prisma generate
+2025-07-02T14:43:17.265504558Z 
+2025-07-02T14:43:19.661416305Z src/middleware/auth.ts(15,23): error TS2339: Property 'header' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661579069Z src/routes/admin.ts(8,12): error TS2304: Cannot find name 'roleMiddleware'.
+2025-07-02T14:43:19.661584909Z src/routes/admin.ts(132,31): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66161175Z src/routes/admin.ts(133,32): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66162179Z src/routes/admin.ts(134,22): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661671112Z src/routes/admin.ts(135,24): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661674862Z src/routes/admin.ts(136,24): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661694162Z src/routes/admin.ts(201,28): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661733523Z src/routes/admin.ts(202,30): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661830526Z src/routes/admin.ts(232,31): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661839766Z src/routes/admin.ts(233,32): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661871587Z src/routes/admin.ts(234,24): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661899408Z src/routes/admin.ts(289,31): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661939819Z src/routes/admin.ts(290,32): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.661942979Z src/routes/admin.ts(291,24): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66197868Z src/routes/admin.ts(346,28): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66198667Z src/routes/admin.ts(370,37): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662029601Z src/routes/bookings.ts(20,13): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662043151Z src/routes/bookings.ts(150,24): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662046471Z src/routes/bookings.ts(151,26): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662088402Z src/routes/bookings.ts(204,31): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662093162Z src/routes/bookings.ts(250,31): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662105553Z src/routes/bookings.ts(251,35): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662133674Z src/routes/bookings.ts(321,31): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662137994Z src/routes/bookings.ts(329,13): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662149044Z src/routes/bookings.ts(409,31): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662191365Z src/routes/bookings.ts(444,30): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662199815Z src/routes/bookings.ts(445,27): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662209816Z src/routes/bookings.ts(446,25): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662229116Z src/routes/calendar.ts(29,56): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662294288Z src/routes/calendar.ts(81,13): error TS2353: Object literal may only specify known properties, and 'requesterId' does not exist in type 'BookingWhereInput'.
+2025-07-02T14:43:19.662320799Z src/routes/calendar.ts(82,13): error TS2353: Object literal may only specify known properties, and 'receiverId' does not exist in type 'BookingWhereInput'.
+2025-07-02T14:43:19.662328629Z src/routes/calendar.ts(86,9): error TS2353: Object literal may only specify known properties, and 'requester' does not exist in type 'BookingInclude<DefaultArgs>'.
+2025-07-02T14:43:19.662334739Z src/routes/calendar.ts(113,18): error TS2353: Object literal may only specify known properties, and 'scheduledDate' does not exist in type 'BookingOrderByWithRelationInput | BookingOrderByWithRelationInput[]'.
+2025-07-02T14:43:19.6623715Z src/routes/calendar.ts(127,92): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66238817Z src/routes/calendar.ts(159,9): error TS2353: Object literal may only specify known properties, and 'requesterId' does not exist in type '(Without<BookingCreateInput, BookingUncheckedCreateInput> & BookingUncheckedCreateInput) | (Without<...> & BookingCreateInput)'.
+2025-07-02T14:43:19.66239586Z src/routes/calendar.ts(169,9): error TS2353: Object literal may only specify known properties, and 'requester' does not exist in type 'BookingInclude<DefaultArgs>'.
+2025-07-02T14:43:19.66239856Z src/routes/calendar.ts(208,31): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662405341Z src/routes/calendar.ts(209,35): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662433501Z src/routes/calendar.ts(225,43): error TS2339: Property 'requesterId' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; hourlyRate: number; currency: string; auPairId: string; hostId: string; status: BookingStatus; notes: string; startDate: Date; endDate: Date; totalHours: number; totalAmount: number; }'.
+2025-07-02T14:43:19.662447192Z src/routes/calendar.ts(228,69): error TS2339: Property 'receiverId' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; hourlyRate: number; currency: string; auPairId: string; hostId: string; status: BookingStatus; notes: string; startDate: Date; endDate: Date; totalHours: number; totalAmount: number; }'.
+2025-07-02T14:43:19.662499883Z src/routes/calendar.ts(239,9): error TS2353: Object literal may only specify known properties, and 'requester' does not exist in type 'BookingInclude<DefaultArgs>'.
+2025-07-02T14:43:19.662517453Z src/routes/documents.ts(12,26): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662527694Z src/routes/documents.ts(14,14): error TS2339: Property 'file' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662571335Z src/routes/documents.ts(31,7): error TS2322: Type '{ url: string; error: any; }' is not assignable to type 'string'.
+2025-07-02T14:43:19.662576545Z src/routes/documents.ts(31,46): error TS2339: Property 'file' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662584015Z src/routes/documents.ts(50,25): error TS2339: Property 'file' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662636867Z src/routes/documents.ts(50,63): error TS2339: Property 'file' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662640637Z src/routes/documents.ts(51,29): error TS2339: Property 'file' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662642407Z src/routes/documents.ts(65,25): error TS2339: Property 'file' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662654097Z src/routes/documents.ts(65,63): error TS2339: Property 'file' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662655957Z src/routes/documents.ts(66,29): error TS2339: Property 'file' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662683868Z src/routes/documents.ts(111,28): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662707508Z src/routes/documents.ts(165,32): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662716229Z src/routes/documents.ts(166,35): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662743139Z src/routes/documents.ts(197,32): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66275635Z src/routes/documents.ts(243,24): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66275825Z src/routes/documents.ts(244,22): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66276936Z src/routes/documents.ts(245,31): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.66277127Z src/routes/documents.ts(246,32): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662803171Z src/routes/matches.ts(12,32): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662805711Z src/routes/matches.ts(27,24): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662809621Z src/routes/matches.ts(75,41): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662826111Z src/routes/matches.ts(143,9): error TS2322: Type 'string' is not assignable to type 'UserRole'.
+2025-07-02T14:43:19.662828121Z src/routes/matches.ts(179,29): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662831741Z src/routes/matches.ts(180,35): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662857412Z src/routes/matches.ts(245,29): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662861352Z src/routes/messages.ts(87,41): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662869313Z src/routes/messages.ts(88,31): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662872362Z src/routes/messages.ts(89,32): error TS2339: Property 'query' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662874162Z src/routes/messages.ts(154,41): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662910514Z src/routes/messages.ts(218,30): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662913734Z src/routes/messages.ts(262,31): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662919054Z src/routes/profiles.ts(27,13): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662957735Z src/routes/profiles.ts(108,13): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662960985Z src/routes/profiles.ts(196,28): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662968475Z src/routes/users.ts(50,24): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662970725Z src/routes/users.ts(81,24): error TS2339: Property 'params' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.662993196Z src/routes/users.ts(82,30): error TS2339: Property 'body' does not exist on type 'AuthRequest'.
+2025-07-02T14:43:19.663023837Z src/utils/supabase.ts(18,36): error TS2503: Cannot find namespace 'Express'.
+2025-07-02T14:43:19.663026657Z src/utils/supabase.ts(38,9): error TS2503: Cannot find namespace 'Express'.
+2025-07-02T14:43:19.703536964Z ==> Build failed 😞
+2025-07-02T14:43:19.703563725Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

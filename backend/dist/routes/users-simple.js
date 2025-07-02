@@ -8,7 +8,7 @@ const index_1 = require("../index");
 const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
 // Get all users (simple endpoint)
-router.get('/', auth_1.authMiddleware, async (req, res) => {
+router.get('/', auth_1.authenticate, async (req, res) => {
     try {
         const users = await index_1.prisma.user.findMany({
             select: {
@@ -27,7 +27,7 @@ router.get('/', auth_1.authMiddleware, async (req, res) => {
     }
 });
 // Get current user
-router.get('/me', auth_1.authMiddleware, async (req, res) => {
+router.get('/me', auth_1.authenticate, async (req, res) => {
     try {
         const user = await index_1.prisma.user.findUnique({
             where: { id: req.user.id },
