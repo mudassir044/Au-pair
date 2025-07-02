@@ -12,13 +12,13 @@ export const setupSocketHandlers = (io: Server) => {
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {
       const token = socket.handshake.auth.token;
-      
+
       if (!token) {
         return next(new Error('Authentication error: No token provided'));
       }
 
       const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as any;
-      
+
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
         select: { id: true, role: true, isActive: true }
@@ -206,4 +206,10 @@ export const setupSocketHandlers = (io: Server) => {
       console.log(`User ${socket.userId} disconnected from socket`);
     });
   });
+};
+
+export { handleConnection };
+
+export const setupMessageHandlers = (io: any) => {
+  io.on('connection', handleConnection);
 };

@@ -42,6 +42,9 @@ const io = new Server(server, {
   }
 });
 
+// Setup Socket.io message handlers
+setupMessageHandlers(io);
+
 // Middleware
 app.use(helmet());
 app.use(morgan('combined'));
@@ -69,9 +72,6 @@ app.use('/api/admin', adminRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
-
-// Setup Socket.io handlers
-setupMessageHandlers(io);
 
 // Start server
 server.listen(PORT, '0.0.0.0', () => {
