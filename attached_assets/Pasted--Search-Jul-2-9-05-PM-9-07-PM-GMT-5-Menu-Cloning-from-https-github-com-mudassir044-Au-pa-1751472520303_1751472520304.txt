@@ -1,0 +1,51 @@
+
+Search
+
+Jul 2, 9:05 PM - 9:07 PM
+GMT+5
+
+Menu
+
+==> Cloning from https://github.com/mudassir044/Au-pair
+==> Checking out commit 5f184fa3785fbe4f450ff28304206efc5d94fbe1 in branch main
+==> Requesting Node.js version >=18.0.0
+==> Using Node.js version 24.3.0 via ./backend/package.json
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'cd backend && npm install && npx prisma generate && npx prisma db push && npm run build'...
+> au-pair-backend@1.0.0 postinstall
+> npx prisma generate
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 97ms
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+added 152 packages, and audited 153 packages in 6s
+17 packages are looking for funding
+  run `npm fund` for details
+found 0 vulnerabilities
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 94ms
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+The database is already in sync with the Prisma schema.
+Running generate... (Use --skip-generate to skip the generators)
+Running generate... - Prisma Client
+✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 103ms
+> au-pair-backend@1.0.0 build
+> tsc && npx prisma generate
+src/middleware/auth.ts(12,10): error TS2503: Cannot find namespace 'Express'.
+src/middleware/auth.ts(20,23): error TS2339: Property 'headers' does not exist on type 'AuthRequest'.
+src/routes/admin.ts(267,13): error TS2304: Cannot find name 'offset'.
+src/routes/calendar.ts(86,9): error TS2353: Object literal may only specify known properties, and 'requester' does not exist in type 'BookingInclude<DefaultArgs>'.
+src/routes/calendar.ts(162,9): error TS2561: Object literal may only specify known properties, but 'scheduledTime' does not exist in type '(Without<BookingCreateInput, BookingUncheckedCreateInput> & BookingUncheckedCreateInput) | (Without<...> & BookingCreateInput)'. Did you mean to write 'scheduledDate'?
+src/routes/calendar.ts(169,9): error TS2353: Object literal may only specify known properties, and 'requester' does not exist in type 'BookingInclude<DefaultArgs>'.
+src/routes/calendar.ts(239,9): error TS2353: Object literal may only specify known properties, and 'requester' does not exist in type 'BookingInclude<DefaultArgs>'.
+src/routes/documents.ts(31,7): error TS2322: Type '{ url: string; error: any; }' is not assignable to type 'string'.
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
