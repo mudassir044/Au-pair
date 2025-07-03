@@ -20,7 +20,10 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Email, password, and role are required' });
     }
 
-    if (!['AU_PAIR', 'HOST_FAMILY'].includes(role)) {
+    // Normalize role to uppercase
+    const normalizedRole = role.toUpperCase();
+    
+    if (!['AU_PAIR', 'HOST_FAMILY'].includes(normalizedRole)) {
       console.log('❌ Invalid role:', role);
       return res.status(400).json({ message: 'Invalid role. Must be AU_PAIR or HOST_FAMILY' });
     }
@@ -54,7 +57,7 @@ router.post('/register', async (req, res) => {
       data: {
         email: email.toLowerCase(),
         password: hashedPassword,
-        role,
+        role: normalizedRole,
         emailVerifyToken
       },
       select: {
