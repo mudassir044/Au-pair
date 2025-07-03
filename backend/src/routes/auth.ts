@@ -12,17 +12,21 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { email, password, role } = req.body;
+    console.log('📝 Registration attempt:', { email, role, passwordLength: password?.length });
 
     // Validation
     if (!email || !password || !role) {
+      console.log('❌ Missing required fields:', { email: !!email, password: !!password, role: !!role });
       return res.status(400).json({ message: 'Email, password, and role are required' });
     }
 
     if (!['AU_PAIR', 'HOST_FAMILY'].includes(role)) {
+      console.log('❌ Invalid role:', role);
       return res.status(400).json({ message: 'Invalid role. Must be AU_PAIR or HOST_FAMILY' });
     }
 
     if (password.length < 6) {
+      console.log('❌ Password too short:', password.length);
       return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }
 
@@ -32,8 +36,11 @@ router.post('/register', async (req, res) => {
     });
 
     if (existingUser) {
+      console.log('❌ User already exists:', email);
       return res.status(400).json({ message: 'User with this email already exists' });
     }
+
+    console.log('✅ New user registration proceeding for:', email);
 
     // Hash password
     const saltRounds = 12;
@@ -89,8 +96,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('🔐 Login attempt for email:', email);
 
     if (!email || !password) {
+      console.log('❌ Missing email or password');
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
@@ -118,14 +127,20 @@ router.post('/login', async (req, res) => {
     });
 
     if (!user || !user.isActive) {
+      console.log('❌ User not found or inactive for email:', email);
       return res.status(401).json({ message: 'Invalid credentials or account deactivated' });
     }
+
+    console.log('✅ User found:', user.email);
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      console.log('❌ Invalid password for user:', user.email);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
+
+    console.log('✅ Password valid for user:', user.email);
 
     // Update last login
     await prisma.user.update({
