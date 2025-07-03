@@ -1,0 +1,96 @@
+
+    at origin (/opt/render/project/src/backend/dist/index.js:75:22)
+    at /opt/render/project/src/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/opt/render/project/src/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/opt/render/project/src/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/opt/render/project/src/backend/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:328:13)
+    at /opt/render/project/src/backend/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:280:10)
+    at logger (/opt/render/project/src/backend/node_modules/morgan/index.js:144:5)
+::1 - - [03/Jul/2025:18:35:26 +0000] "OPTIONS /auth/register HTTP/1.1" 403 44 "https://au-pair.netlify.app/" "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/137.0.7151.107 Mobile/15E148 Safari/604.1"
+Error: Error: Not allowed by CORS
+    at origin (/opt/render/project/src/backend/dist/index.js:75:22)
+    at /opt/render/project/src/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/opt/render/project/src/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/opt/render/project/src/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/opt/render/project/src/backend/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:328:13)
+    at /opt/render/project/src/backend/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:280:10)
+    at logger (/opt/render/project/src/backend/node_modules/morgan/index.js:144:5)
+::1 - - [03/Jul/2025:18:35:42 +0000] "OPTIONS /auth/register HTTP/1.1" 403 44 "https://au-pair.netlify.app/" "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/137.0.7151.107 Mobile/15E148 Safari/604.1"
+Error: Error: Not allowed by CORS
+    at origin (/opt/render/project/src/backend/dist/index.js:75:22)
+    at /opt/render/project/src/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/opt/render/project/src/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/opt/render/project/src/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/opt/render/project/src/backend/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:328:13)
+    at /opt/render/project/src/backend/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:280:10)
+    at logger (/opt/render/project/src/backend/node_modules/morgan/index.js:144:5)
+::1 - - [03/Jul/2025:18:36:07 +0000] "OPTIONS /auth/register HTTP/1.1" 403 44 "https://au-pair.netlify.app/" "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/137.0.7151.107 Mobile/15E148 Safari/604.1"
+Error: Error: Not allowed by CORS
+    at origin (/opt/render/project/src/backend/dist/index.js:75:22)
+    at /opt/render/project/src/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/opt/render/project/src/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/opt/render/project/src/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/opt/render/project/src/backend/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:328:13)
+    at /opt/render/project/src/backend/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:280:10)
+    at logger (/opt/render/project/src/backend/node_modules/morgan/index.js:144:5)
+::1 - - [03/Jul/2025:18:36:49 +0000] "OPTIONS /auth/login HTTP/1.1" 403 44 "https://au-pair.netlify.app/" "Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/137.0.7151.107 Mobile/15E148 Safari/604.1"
+Error: Error: Not allowed by CORS
+    at origin (/opt/render/project/src/backend/dist/index.js:75:22)
+    at /opt/render/project/src/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/opt/render/project/src/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/opt/render/project/src/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/opt/render/project/src/backend/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:328:13)
+    at /opt/render/project/src/backend/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:280:10)
+    at logger (/opt/render/project/src/backend/node_modules/morgan/index.js:144:5)
+::1 - - [03/Jul/2025:18:38:17 +0000] "OPTIONS /auth/login HTTP/1.1" 403 44 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+Error: Error: Not allowed by CORS
+    at origin (/opt/render/project/src/backend/dist/index.js:75:22)
+    at /opt/render/project/src/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/opt/render/project/src/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/opt/render/project/src/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/opt/render/project/src/backend/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:328:13)
+    at /opt/render/project/src/backend/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:280:10)
+    at logger (/opt/render/project/src/backend/node_modules/morgan/index.js:144:5)
+::1 - - [03/Jul/2025:18:38:27 +0000] "OPTIONS /auth/login HTTP/1.1" 403 44 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+Error: Error: Not allowed by CORS
+    at origin (/opt/render/project/src/backend/dist/index.js:75:22)
+    at /opt/render/project/src/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/opt/render/project/src/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/opt/render/project/src/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/opt/render/project/src/backend/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:328:13)
+    at /opt/render/project/src/backend/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:280:10)
+    at logger (/opt/render/project/src/backend/node_modules/morgan/index.js:144:5)
+::1 - - [03/Jul/2025:18:38:33 +0000] "OPTIONS /auth/login HTTP/1.1" 403 44 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+Error: Error: Not allowed by CORS
+    at origin (/opt/render/project/src/backend/dist/index.js:75:22)
+    at /opt/render/project/src/backend/node_modules/cors/lib/index.js:219:13
+    at optionsCallback (/opt/render/project/src/backend/node_modules/cors/lib/index.js:199:9)
+    at corsMiddleware (/opt/render/project/src/backend/node_modules/cors/lib/index.js:204:7)
+    at Layer.handle [as handle_request] (/opt/render/project/src/backend/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:328:13)
+    at /opt/render/project/src/backend/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/backend/node_modules/express/lib/router/index.js:280:10)
+    at logger (/opt/render/project/src/backend/node_modules/morgan/index.js:144:5)
+::1 - - [03/Jul/2025:18:39:12 +0000] "OPTIONS /auth/register HTTP/1.1" 403 44 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
