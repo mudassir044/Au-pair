@@ -29,5 +29,9 @@ args = "cd backend && npm install && npx prisma generate && npx prisma db push &
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 10000
+externalPort = 3000
+
 [deployment]
 run = ["sh", "-c", "cd backend && npm install && npx prisma generate && npx prisma db push && npm run dev"]

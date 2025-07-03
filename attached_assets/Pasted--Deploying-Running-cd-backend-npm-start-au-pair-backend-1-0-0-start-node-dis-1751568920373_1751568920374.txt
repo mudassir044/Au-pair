@@ -1,0 +1,30 @@
+     ==> Deploying...
+==> Running 'cd backend && npm start'
+> au-pair-backend@1.0.0 start
+> node dist/index.js
+[dotenv@17.0.1] injecting env (0) from .env – [tip] encrypt with dotenvx: https://dotenvx.com
+🔌 Socket.io message handlers initialized
+🚀 Au-pair backend server running on port 5000
+📊 Environment: production
+🔗 Health check: http://0.0.0.0:5000/health
+🌐 CORS allowed origins: https://au-pair.netlify.app
+::1 - - [03/Jul/2025:18:44:45 +0000] "HEAD / HTTP/1.1" 404 56 "-" "Go-http-client/1.1"
+     ==> Your service is live 🎉
+     ==> 
+     ==> ///////////////////////////////////////////////////////////
+     ==> 
+     ==> Available at your primary URL https://au-pair.onrender.com
+     ==> 
+     ==> ///////////////////////////////////////////////////////////
+::1 - - [03/Jul/2025:18:45:22 +0000] "OPTIONS /auth/login HTTP/1.1" 204 0 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [03/Jul/2025:18:45:23 +0000] "POST /auth/login HTTP/1.1" 404 66 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [03/Jul/2025:18:45:33 +0000] "OPTIONS /auth/login HTTP/1.1" 204 0 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [03/Jul/2025:18:45:34 +0000] "POST /auth/login HTTP/1.1" 404 66 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [03/Jul/2025:18:45:54 +0000] "OPTIONS /auth/register HTTP/1.1" 204 0 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [03/Jul/2025:18:45:54 +0000] "POST /auth/register HTTP/1.1" 404 69 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [03/Jul/2025:18:46:08 +0000] "OPTIONS /auth/register HTTP/1.1" 204 0 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [03/Jul/2025:18:46:09 +0000] "POST /auth/register HTTP/1.1" 404 69 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+     ==> Detected service running on port 5000
+     ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+::1 - - [03/Jul/2025:18:53:21 +0000] "OPTIONS /auth/register HTTP/1.1" 204 0 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [03/Jul/2025:18:53:22 +0000] "POST /auth/register HTTP/1.1" 404 69 "https://au-pair.netlify.app/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
