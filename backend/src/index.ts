@@ -1,4 +1,3 @@
-
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -66,20 +65,11 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // CORS middleware
 app.use(cors({
-  origin: function (origin, callback) {
-    const allowedOrigins = process.env.NODE_ENV === 'production' 
-      ? [process.env.FRONTEND_URL as string]
-      : ['http://localhost:3000', 'http://127.0.0.1:3000'];
-    
-    // Allow requests with no origin (mobile apps, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'http://localhost:3000',
+    'https://au-pair.netlify.app',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -114,11 +104,11 @@ app.use('/api/admin', adminRoutes);
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err.stack);
-  
+
   if (err.message === 'Not allowed by CORS') {
     return res.status(403).json({ message: 'CORS error: Origin not allowed' });
   }
-  
+
   res.status(500).json({ 
     message: 'Internal server error',
     error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
@@ -145,10 +135,10 @@ server.listen(parseInt(PORT as string, 10), () => {
 // Graceful shutdown
 const gracefulShutdown = async (signal: string) => {
   console.log(`${signal} received, shutting down gracefully`);
-  
+
   server.close(async () => {
     console.log('HTTP server closed');
-    
+
     try {
       await prisma.$disconnect();
       console.log('Database connection closed');
@@ -158,7 +148,7 @@ const gracefulShutdown = async (signal: string) => {
       process.exit(1);
     }
   });
-  
+
   // Force shutdown after 10 seconds
   setTimeout(() => {
     console.log('Forced shutdown after timeout');
