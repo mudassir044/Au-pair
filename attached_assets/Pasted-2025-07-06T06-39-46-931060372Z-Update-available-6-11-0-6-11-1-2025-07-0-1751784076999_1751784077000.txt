@@ -1,0 +1,50 @@
+2025-07-06T06:39:46.931060372Z │  Update available 6.11.0 -> 6.11.1                      │
+2025-07-06T06:39:46.931064862Z │  Run the following to update                            │
+2025-07-06T06:39:46.931068812Z │    npm i --save-dev prisma@latest                       │
+2025-07-06T06:39:46.931072443Z │    npm i @prisma/client@latest                          │
+2025-07-06T06:39:46.931076433Z └─────────────────────────────────────────────────────────┘
+2025-07-06T06:39:46.931093953Z 
+2025-07-06T06:39:46.931099844Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 87ms
+2025-07-06T06:39:46.931103724Z 
+2025-07-06T06:39:46.931107584Z Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2025-07-06T06:39:46.931111204Z 
+2025-07-06T06:39:46.931115654Z Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+2025-07-06T06:39:46.931120364Z 
+2025-07-06T06:39:47.013138344Z 
+2025-07-06T06:39:47.013181546Z added 152 packages, and audited 153 packages in 5s
+2025-07-06T06:39:47.013187216Z 
+2025-07-06T06:39:47.013192456Z 17 packages are looking for funding
+2025-07-06T06:39:47.013215147Z   run `npm fund` for details
+2025-07-06T06:39:47.014379358Z 
+2025-07-06T06:39:47.014423569Z found 0 vulnerabilities
+2025-07-06T06:39:48.02041993Z Environment variables loaded from .env
+2025-07-06T06:39:48.021464326Z Prisma schema loaded from prisma/schema.prisma
+2025-07-06T06:39:48.220519961Z 
+2025-07-06T06:39:48.220539582Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 86ms
+2025-07-06T06:39:48.220544442Z 
+2025-07-06T06:39:48.220548832Z Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2025-07-06T06:39:48.220552822Z 
+2025-07-06T06:39:48.220557402Z Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+2025-07-06T06:39:48.220561293Z 
+2025-07-06T06:39:49.135712372Z Environment variables loaded from .env
+2025-07-06T06:39:49.136670336Z Prisma schema loaded from prisma/schema.prisma
+2025-07-06T06:39:49.13932543Z Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-0-ap-southeast-1.pooler.supabase.com:5432"
+2025-07-06T06:39:56.540123323Z 
+2025-07-06T06:39:56.540161674Z The database is already in sync with the Prisma schema.
+2025-07-06T06:39:56.54031688Z 
+2025-07-06T06:39:56.541321196Z Running generate... (Use --skip-generate to skip the generators)
+2025-07-06T06:39:56.655966787Z Running generate... - Prisma Client
+2025-07-06T06:39:56.78329364Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 125ms
+2025-07-06T06:39:56.783375123Z 
+2025-07-06T06:39:56.950289051Z 
+2025-07-06T06:39:56.950308201Z > au-pair-backend@1.0.0 build
+2025-07-06T06:39:56.950311292Z > tsc && npx prisma generate
+2025-07-06T06:39:56.950313452Z 
+2025-07-06T06:39:59.236750506Z src/routes/dashboard.ts(4,10): error TS2724: '"../middleware/auth"' has no exported member named 'authenticateToken'. Did you mean 'authenticate'?
+2025-07-06T06:39:59.236895921Z src/routes/dashboard.ts(95,19): error TS2339: Property 'location' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; userId: string; firstName: string; lastName: string; dateOfBirth: Date; bio: string; languages: string; skills: string; experience: string; ... 7 more ...; profilePhotoUrl: string; }'.
+2025-07-06T06:39:59.236955023Z src/routes/matches.ts(274,23): error TS2304: Cannot find name 'authenticateToken'.
+2025-07-06T06:39:59.236959463Z src/routes/messages.ts(289,30): error TS2304: Cannot find name 'authenticateToken'.
+2025-07-06T06:39:59.236999944Z src/routes/profiles.ts(250,27): error TS2304: Cannot find name 'authenticateToken'.
+2025-07-06T06:39:59.237003695Z src/routes/profiles.ts(280,45): error TS2339: Property 'location' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; userId: string; firstName: string; lastName: string; dateOfBirth: Date; bio: string; languages: string; skills: string; experience: string; ... 7 more ...; profilePhotoUrl: string; }'.
+2025-07-06T06:39:59.285287825Z ==> Build failed 😞
+2025-07-06T06:39:59.285309786Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
