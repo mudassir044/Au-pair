@@ -1,0 +1,1844 @@
+Here's the problem: My frontend is trying to fetch data from these routes (GET requests):
+
+/api/dashboard/stats
+
+/api/profile/completion
+
+/api/matches/recent
+
+/api/matches
+
+/api/conversations
+
+/api/bookings
+
+But I keep getting 404 errors.
+
+I want you to:
+
+Review the entire FastAPI backend codebase and identify which of these routes are missing.
+
+Create and register all of these routes so they exist, return mock or placeholder data (you can use Pydantic models or dictionaries).
+
+If I’m using APIRouters, make sure the /api prefix is included when registering the routers: app.include_router(my_router, prefix="/api")
+
+Fix or create the functions so they respond with status 200, and return sample JSON for now.
+
+Print the full updated backend code, including any new routes, schemas, and imports.
+
+Be extremely thorough. Do not skip any step. Output only valid Python code.
+
+Here's a sample placeholder response format for each route:
+
+json Copy Edit { "status": "success", "data": { ... } // include mock fields for each specific endpoint } ⚠️ Ensure that all paths match exactly what the frontend is trying to access, including the /api prefix.
+
+I'll help you identify and create the missing routes in your FastAPI backend. Let me first check what routes you currently have in your backend code.
+
+Based on your database schema and the routes you're trying to access, I'll create a complete FastAPI backend implementation with all the required routes. Here's the full code:
+
+from
+ fastapi 
+import
+ FastAPI, APIRouter, Depends, HTTPException, status
+from
+ fastapi.middleware.cors 
+import
+ CORSMiddleware
+from
+ pydantic 
+import
+ BaseModel, Field
+from
+ typing 
+import
+ 
+List
+, 
+Optional
+, 
+Dict
+, 
+Any
+, 
+Union
+
+from
+ datetime 
+import
+ datetime, timedelta
+import
+ uuid
+from
+ enum 
+import
+ Enum
+import
+ random
+# Create the FastAPI app
+
+app = FastAPI(title=
+"Au Pair Matching API"
+)
+# Add CORS middleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+"*"
+],  
+# Adjust this in production
+
+    allow_credentials=
+True
+,
+    allow_methods=[
+"*"
+],
+    allow_headers=[
+"*"
+],
+)
+# Define enums based on your database schema
+
+class
+ 
+UserRole
+(
+str
+, Enum
+):
+
+    AU_PAIR = 
+"AU_PAIR"
+
+    HOST_FAMILY = 
+"HOST_FAMILY"
+
+    ADMIN = 
+"ADMIN"
+
+class
+ 
+MatchStatus
+(
+str
+, Enum
+):
+
+    PENDING = 
+"PENDING"
+
+    APPROVED = 
+"APPROVED"
+
+    REJECTED = 
+"REJECTED"
+
+class
+ 
+BookingStatus
+(
+str
+, Enum
+):
+
+    PENDING = 
+"PENDING"
+
+    APPROVED = 
+"APPROVED"
+
+    REJECTED = 
+"REJECTED"
+
+    CANCELLED = 
+"CANCELLED"
+
+    COMPLETED = 
+"COMPLETED"
+
+class
+ 
+DocumentType
+(
+str
+, Enum
+):
+
+    ID = 
+"ID"
+
+    PASSPORT = 
+"PASSPORT"
+
+    VISA = 
+"VISA"
+
+    PROFILE_PHOTO = 
+"PROFILE_PHOTO"
+
+class
+ 
+DocumentStatus
+(
+str
+, Enum
+):
+
+    PENDING = 
+"PENDING"
+
+    VERIFIED = 
+"VERIFIED"
+
+    REJECTED = 
+"REJECTED"
+
+# Define Pydantic models for responses
+
+class
+ 
+ResponseModel
+(
+BaseModel
+):
+
+    status: 
+str
+ = 
+"success"
+
+    data: 
+Dict
+[
+str
+, 
+Any
+]
+# Dashboard models
+
+class
+ 
+DashboardStats
+(
+BaseModel
+):
+
+    total_matches: 
+int
+
+    pending_matches: 
+int
+
+    approved_matches: 
+int
+
+    total_bookings: 
+int
+
+    upcoming_bookings: 
+int
+
+    unread_messages: 
+int
+
+    profile_completion: 
+float
+
+# Profile models
+
+class
+ 
+ProfileCompletion
+(
+BaseModel
+):
+
+    completion_percentage: 
+float
+
+    missing_fields: 
+List
+[
+str
+]
+    profile_type: 
+str
+
+# Match models
+
+class
+ 
+MatchUser
+(
+BaseModel
+):
+
+    
+id
+: 
+str
+
+    name: 
+str
+
+    role: UserRole
+    profile_photo_url: 
+Optional
+[
+str
+] = 
+None
+
+class
+ 
+Match
+(
+BaseModel
+):
+
+    
+id
+: 
+str
+
+    host: MatchUser
+    au_pair: MatchUser
+    match_score: 
+float
+
+    status: MatchStatus
+    initiated_by: UserRole
+    created_at: datetime
+    updated_at: 
+Optional
+[datetime] = 
+None
+
+# Conversation models
+
+class
+ 
+MessagePreview
+(
+BaseModel
+):
+
+    
+id
+: 
+str
+
+    content: 
+str
+
+    is_read: 
+bool
+
+    created_at: datetime
+class
+ 
+Conversation
+(
+BaseModel
+):
+
+    
+id
+: 
+str
+
+    with_user: MatchUser
+    last_message: MessagePreview
+    unread_count: 
+int
+
+# Booking models
+
+class
+ 
+Booking
+(
+BaseModel
+):
+
+    
+id
+: 
+str
+
+    au_pair: MatchUser
+    host: MatchUser
+    start_date: datetime
+    end_date: datetime
+    scheduled_date: 
+Optional
+[datetime] = 
+None
+
+    total_hours: 
+Optional
+[
+float
+] = 
+None
+
+    hourly_rate: 
+Optional
+[
+float
+] = 
+None
+
+    total_amount: 
+Optional
+[
+float
+] = 
+None
+
+    currency: 
+str
+ = 
+"USD"
+
+    status: BookingStatus
+    notes: 
+Optional
+[
+str
+] = 
+None
+
+    created_at: datetime
+    updated_at: 
+Optional
+[datetime] = 
+None
+
+# Create routers
+
+dashboard_router = APIRouter(tags=[
+"Dashboard"
+])
+profile_router = APIRouter(tags=[
+"Profile"
+])
+matches_router = APIRouter(tags=[
+"Matches"
+])
+conversations_router = APIRouter(tags=[
+"Conversations"
+])
+bookings_router = APIRouter(tags=[
+"Bookings"
+])
+# Mock user for testing
+
+def
+ 
+get_current_user
+():
+
+    
+return
+ {
+        
+"id"
+: 
+"user-123"
+,
+        
+"email"
+: 
+"test@example.com"
+,
+        
+"role"
+: random.choice([
+"AU_PAIR"
+, 
+"HOST_FAMILY"
+]),
+        
+"is_active"
+: 
+True
+
+    }
+# Dashboard routes
+
+@dashboard_router.get(
+"/dashboard/stats"
+)
+
+async
+ 
+def
+ 
+get_dashboard_stats
+(
+current_user=Depends(
+get_current_user
+)
+):
+
+    
+"""Get dashboard statistics for the current user"""
+
+    stats = {
+        
+"total_matches"
+: random.randint(
+5
+, 
+20
+),
+        
+"pending_matches"
+: random.randint(
+1
+, 
+5
+),
+        
+"approved_matches"
+: random.randint(
+3
+, 
+10
+),
+        
+"total_bookings"
+: random.randint(
+3
+, 
+15
+),
+        
+"upcoming_bookings"
+: random.randint(
+1
+, 
+5
+),
+        
+"unread_messages"
+: random.randint(
+0
+, 
+10
+),
+        
+"profile_completion"
+: 
+round
+(random.uniform(
+0.3
+, 
+1.0
+), 
+2
+) * 
+100
+
+    }
+    
+return
+ ResponseModel(data=stats)
+# Profile routes
+
+@profile_router.get(
+"/profile/completion"
+)
+
+async
+ 
+def
+ 
+get_profile_completion
+(
+current_user=Depends(
+get_current_user
+)
+):
+
+    
+"""Get profile completion status for the current user"""
+
+    user_role = current_user[
+"role"
+]
+    
+# Different missing fields based on user role
+
+    missing_fields = []
+    
+if
+ random.random() > 
+0.7
+:
+        
+if
+ user_role == 
+"AU_PAIR"
+:
+            missing_fields = random.sample([
+"bio"
+, 
+"languages"
+, 
+"skills"
+, 
+"experience"
+, 
+"education"
+, 
+"profilePhotoUrl"
+], 
+                                          random.randint(
+0
+, 
+3
+))
+        
+else
+:
+            missing_fields = random.sample([
+"bio"
+, 
+"location"
+, 
+"childrenAges"
+, 
+"requirements"
+, 
+"preferredLanguages"
+, 
+"profilePhotoUrl"
+], 
+                                          random.randint(
+0
+, 
+3
+))
+    completion_data = {
+        
+"completion_percentage"
+: 
+round
+((
+1
+ - 
+len
+(missing_fields) / 
+10
+) * 
+100
+, 
+1
+),
+        
+"missing_fields"
+: missing_fields,
+        
+"profile_type"
+: 
+"au_pair"
+ 
+if
+ user_role == 
+"AU_PAIR"
+ 
+else
+ 
+"host_family"
+
+    }
+    
+return
+ ResponseModel(data=completion_data)
+# Matches routes
+
+@matches_router.get(
+"/matches/recent"
+)
+
+async
+ 
+def
+ 
+get_recent_matches
+(
+current_user=Depends(
+get_current_user
+)
+):
+
+    
+"""Get recent matches for the current user"""
+
+    user_role = current_user[
+"role"
+]
+    matches = []
+    
+for
+ i 
+in
+ 
+range
+(random.randint(
+3
+, 
+5
+)):
+        match_id = 
+f"match-
+{uuid.uuid4()}
+"
+
+        
+# Create opposite role user
+
+        other_role = 
+"HOST_FAMILY"
+ 
+if
+ user_role == 
+"AU_PAIR"
+ 
+else
+ 
+"AU_PAIR"
+
+        other_user = {
+            
+"id"
+: 
+f"user-
+{uuid.uuid4()}
+"
+,
+            
+"name"
+: 
+f"
+{
+'Host'
+ 
+if
+ other_role == 
+'HOST_FAMILY'
+ 
+else
+ 
+'Au Pair'
+}
+ 
+{i+
+1
+}
+"
+,
+            
+"role"
+: other_role,
+            
+"profile_photo_url"
+: 
+f"https://randomuser.me/api/portraits/
+{
+'women'
+ 
+if
+ random.random() > 
+0.5
+ 
+else
+ 
+'men'
+}
+/
+{random.randint(
+1
+, 
+99
+)}
+.jpg"
+
+        }
+        
+# Create current user representation
+
+        current_user_repr = {
+            
+"id"
+: current_user[
+"id"
+],
+            
+"name"
+: 
+f"
+{
+'Host'
+ 
+if
+ user_role == 
+'HOST_FAMILY'
+ 
+else
+ 
+'Au Pair'
+}
+ User"
+,
+            
+"role"
+: user_role,
+            
+"profile_photo_url"
+: 
+f"https://randomuser.me/api/portraits/
+{
+'women'
+ 
+if
+ random.random() > 
+0.5
+ 
+else
+ 
+'men'
+}
+/
+{random.randint(
+1
+, 
+99
+)}
+.jpg"
+
+        }
+        
+# Create match object
+
+        match = {
+            
+"id"
+: match_id,
+            
+"host"
+: current_user_repr 
+if
+ user_role == 
+"HOST_FAMILY"
+ 
+else
+ other_user,
+            
+"au_pair"
+: other_user 
+if
+ user_role == 
+"HOST_FAMILY"
+ 
+else
+ current_user_repr,
+            
+"match_score"
+: 
+round
+(random.uniform(
+0.7
+, 
+0.99
+), 
+2
+),
+            
+"status"
+: random.choice([
+"PENDING"
+, 
+"APPROVED"
+, 
+"REJECTED"
+]),
+            
+"initiated_by"
+: random.choice([
+"AU_PAIR"
+, 
+"HOST_FAMILY"
+]),
+            
+"created_at"
+: (datetime.now() - timedelta(days=random.randint(
+1
+, 
+30
+))).isoformat(),
+            
+"updated_at"
+: (datetime.now() - timedelta(days=random.randint(
+0
+, 
+5
+))).isoformat()
+        }
+        matches.append(match)
+    
+return
+ ResponseModel(data={
+"matches"
+: matches})
+@matches_router.get(
+"/matches"
+)
+
+async
+ 
+def
+ 
+get_all_matches
+(
+
+    status: 
+Optional
+[
+str
+] = 
+None
+,
+    page: 
+int
+ = 
+1
+,
+    limit: 
+int
+ = 
+10
+,
+    current_user=Depends(
+get_current_user
+)
+):
+
+    
+"""Get all matches for the current user with optional filtering"""
+
+    user_role = current_user[
+"role"
+]
+    matches = []
+    total_matches = random.randint(
+15
+, 
+30
+)
+    
+for
+ i 
+in
+ 
+range
+(
+min
+(limit, total_matches - (page-
+1
+)*limit)):
+        match_id = 
+f"match-
+{uuid.uuid4()}
+"
+
+        
+# Create opposite role user
+
+        other_role = 
+"HOST_FAMILY"
+ 
+if
+ user_role == 
+"AU_PAIR"
+ 
+else
+ 
+"AU_PAIR"
+
+        other_user = {
+            
+"id"
+: 
+f"user-
+{uuid.uuid4()}
+"
+,
+            
+"name"
+: 
+f"
+{
+'Host'
+ 
+if
+ other_role == 
+'HOST_FAMILY'
+ 
+else
+ 
+'Au Pair'
+}
+ 
+{i+
+1
+}
+"
+,
+            
+"role"
+: other_role,
+            
+"profile_photo_url"
+: 
+f"https://randomuser.me/api/portraits/
+{
+'women'
+ 
+if
+ random.random() > 
+0.5
+ 
+else
+ 
+'men'
+}
+/
+{random.randint(
+1
+, 
+99
+)}
+.jpg"
+
+        }
+        
+# Create current user representation
+
+        current_user_repr = {
+            
+"id"
+: current_user[
+"id"
+],
+            
+"name"
+: 
+f"
+{
+'Host'
+ 
+if
+ user_role == 
+'HOST_FAMILY'
+ 
+else
+ 
+'Au Pair'
+}
+ User"
+,
+            
+"role"
+: user_role,
+            
+"profile_photo_url"
+: 
+f"https://randomuser.me/api/portraits/
+{
+'women'
+ 
+if
+ random.random() > 
+0.5
+ 
+else
+ 
+'men'
+}
+/
+{random.randint(
+1
+, 
+99
+)}
+.jpg"
+
+        }
+        match_status = status 
+if
+ status 
+else
+ random.choice([
+"PENDING"
+, 
+"APPROVED"
+, 
+"REJECTED"
+])
+        
+# Create match object
+
+        match = {
+            
+"id"
+: match_id,
+            
+"host"
+: current_user_repr 
+if
+ user_role == 
+"HOST_FAMILY"
+ 
+else
+ other_user,
+            
+"au_pair"
+: other_user 
+if
+ user_role == 
+"HOST_FAMILY"
+ 
+else
+ current_user_repr,
+            
+"match_score"
+: 
+round
+(random.uniform(
+0.7
+, 
+0.99
+), 
+2
+),
+            
+"status"
+: match_status,
+            
+"initiated_by"
+: random.choice([
+"AU_PAIR"
+, 
+"HOST_FAMILY"
+]),
+            
+"created_at"
+: (datetime.now() - timedelta(days=random.randint(
+1
+, 
+30
+))).isoformat(),
+            
+"updated_at"
+: (datetime.now() - timedelta(days=random.randint(
+0
+, 
+5
+))).isoformat()
+        }
+        matches.append(match)
+    
+return
+ ResponseModel(data={
+        
+"matches"
+: matches,
+        
+"pagination"
+: {
+            
+"total"
+: total_matches,
+            
+"page"
+: page,
+            
+"limit"
+: limit,
+            
+"pages"
+: (total_matches + limit - 
+1
+) // limit
+        }
+    })
+# Conversations routes
+
+@conversations_router.get(
+"/conversations"
+)
+
+async
+ 
+def
+ 
+get_conversations
+(
+
+    page: 
+int
+ = 
+1
+,
+    limit: 
+int
+ = 
+10
+,
+    current_user=Depends(
+get_current_user
+)
+):
+
+    
+"""Get all conversations for the current user"""
+
+    user_role = current_user[
+"role"
+]
+    conversations = []
+    total_conversations = random.randint(
+5
+, 
+15
+)
+    
+for
+ i 
+in
+ 
+range
+(
+min
+(limit, total_conversations - (page-
+1
+)*limit)):
+        conversation_id = 
+f"conv-
+{uuid.uuid4()}
+"
+
+        
+# Create opposite role user
+
+        other_role = 
+"HOST_FAMILY"
+ 
+if
+ user_role == 
+"AU_PAIR"
+ 
+else
+ 
+"AU_PAIR"
+
+        other_user = {
+            
+"id"
+: 
+f"user-
+{uuid.uuid4()}
+"
+,
+            
+"name"
+: 
+f"
+{
+'Host'
+ 
+if
+ other_role == 
+'HOST_FAMILY'
+ 
+else
+ 
+'Au Pair'
+}
+ 
+{i+
+1
+}
+"
+,
+            
+"role"
+: other_role,
+            
+"profile_photo_url"
+: 
+f"https://randomuser.me/api/portraits/
+{
+'women'
+ 
+if
+ random.random() > 
+0.5
+ 
+else
+ 
+'men'
+}
+/
+{random.randint(
+1
+, 
+99
+)}
+.jpg"
+
+        }
+        
+# Create last message
+
+        last_message = {
+            
+"id"
+: 
+f"msg-
+{uuid.uuid4()}
+"
+,
+            
+"content"
+: random.choice([
+                
+"Hello, how are you?"
+,
+                
+"When are you available for a call?"
+,
+                
+"I'd like to discuss the details."
+,
+                
+"Thank you for your time!"
+,
+                
+"Looking forward to meeting you."
+,
+                
+"Can we schedule a meeting?"
+,
+                
+"I have some questions about your profile."
+
+            ]),
+            
+"is_read"
+: random.choice([
+True
+, 
+False
+]),
+            
+"created_at"
+: (datetime.now() - timedelta(minutes=random.randint(
+5
+, 
+1440
+))).isoformat()
+        }
+        
+# Create conversation object
+
+        conversation = {
+            
+"id"
+: conversation_id,
+            
+"with_user"
+: other_user,
+            
+"last_message"
+: last_message,
+            
+"unread_count"
+: random.randint(
+0
+, 
+5
+)
+        }
+        conversations.append(conversation)
+    
+return
+ ResponseModel(data={
+        
+"conversations"
+: conversations,
+        
+"pagination"
+: {
+            
+"total"
+: total_conversations,
+            
+"page"
+: page,
+            
+"limit"
+: limit,
+            
+"pages"
+: (total_conversations + limit - 
+1
+) // limit
+        }
+    })
+# Bookings routes
+
+@bookings_router.get(
+"/bookings"
+)
+
+async
+ 
+def
+ 
+get_bookings
+(
+
+    status: 
+Optional
+[
+str
+] = 
+None
+,
+    page: 
+int
+ = 
+1
+,
+    limit: 
+int
+ = 
+10
+,
+    current_user=Depends(
+get_current_user
+)
+):
+
+    
+"""Get all bookings for the current user with optional filtering"""
+
+    user_role = current_user[
+"role"
+]
+    bookings = []
+    total_bookings = random.randint(
+5
+, 
+20
+)
+    
+for
+ i 
+in
+ 
+range
+(
+min
+(limit, total_bookings - (page-
+1
+)*limit)):
+        booking_id = 
+f"booking-
+{uuid.uuid4()}
+"
+
+        
+# Create opposite role user
+
+        other_role = 
+"HOST_FAMILY"
+ 
+if
+ user_role == 
+"AU_PAIR"
+ 
+else
+ 
+"AU_PAIR"
+
+        other_user = {
+            
+"id"
+: 
+f"user-
+{uuid.uuid4()}
+"
+,
+            
+"name"
+: 
+f"
+{
+'Host'
+ 
+if
+ other_role == 
+'HOST_FAMILY'
+ 
+else
+ 
+'Au Pair'
+}
+ 
+{i+
+1
+}
+"
+,
+            
+"role"
+: other_role,
+            
+"profile_photo_url"
+: 
+f"https://randomuser.me/api/portraits/
+{
+'women'
+ 
+if
+ random.random() > 
+0.5
+ 
+else
+ 
+'men'
+}
+/
+{random.randint(
+1
+, 
+99
+)}
+.jpg"
+
+        }
+        
+# Create current user representation
+
+        current_user_repr = {
+            
+"id"
+: current_user[
+"id"
+],
+            
+"name"
+: 
+f"
+{
+'Host'
+ 
+if
+ user_role == 
+'HOST_FAMILY'
+ 
+else
+ 
+'Au Pair'
+}
+ User"
+,
+            
+"role"
+: user_role,
+            
+"profile_photo_url"
+: 
+f"https://randomuser.me/api/portraits/
+{
+'women'
+ 
+if
+ random.random() > 
+0.5
+ 
+else
+ 
+'men'
+}
+/
+{random.randint(
+1
+, 
+99
+)}
+.jpg"
+
+        }
+        booking_status = status 
+if
+ status 
+else
+ random.choice([
+"PENDING"
+, 
+"APPROVED"
+, 
+"REJECTED"
+, 
+"CANCELLED"
+, 
+"COMPLETED"
+])
+        
+# Generate random dates
+
+        start_date = datetime.now() + timedelta(days=random.randint(
+1
+, 
+30
+))
+        end_date = start_date + timedelta(hours=random.randint(
+2
+, 
+8
+))
+        
+# Create booking object
+
+        booking = {
+            
+"id"
+: booking_id,
+            
+"host"
+: current_user_repr 
+if
+ user_role == 
+"HOST_FAMILY"
+ 
+else
+ other_user,
+            
+"au_pair"
+: other_user 
+if
+ user_role == 
+"HOST_FAMILY"
+ 
+else
+ current_user_repr,
+            
+"start_date"
+: start_date.isoformat(),
+            
+"end_date"
+: end_date.isoformat(),
+            
+"scheduled_date"
+: (datetime.now() + timedelta(days=random.randint(
+1
+, 
+30
+))).isoformat(),
+            
+"total_hours"
+: 
+round
+(random.uniform(
+2
+, 
+8
+), 
+1
+),
+            
+"hourly_rate"
+: 
+round
+(random.uniform(
+15
+, 
+30
+), 
+2
+),
+            
+"total_amount"
+: 
+round
+(random.uniform(
+30
+, 
+240
+), 
+2
+),
+            
+"currency"
+: 
+"USD"
+,
+            
+"status"
+: booking_status,
+            
+"notes"
+: random.choice([
+None
+, 
+"Please arrive 15 minutes early"
+, 
+"Bring activities for the children"
+, 
+"We have a dog"
+]),
+            
+"created_at"
+: (datetime.now() - timedelta(days=random.randint(
+1
+, 
+30
+))).isoformat(),
+            
+"updated_at"
+: (datetime.now() - timedelta(days=random.randint(
+0
+, 
+5
+))).isoformat()
+        }
+        bookings.append(booking)
+    
+return
+ ResponseModel(data={
+        
+"bookings"
+: bookings,
+        
+"pagination"
+: {
+            
+"total"
+: total_bookings,
+            
+"page"
+: page,
+            
+"limit"
+: limit,
+            
+"pages"
+: (total_bookings + limit - 
+1
+) // limit
+        }
+    })
+# Register all routers with the /api prefix
+
+app.include_router(dashboard_router, prefix=
+"/api"
+)
+app.include_router(profile_router, prefix=
+"/api"
+)
+app.include_router(matches_router, prefix=
+"/api"
+)
+app.include_router(conversations_router, prefix=
+"/api"
+)
+app.include_router(bookings_router, prefix=
+"/api"
+)
+# Root endpoint
+
+@app.get(
+"/"
+)
+
+async
+ 
+def
+ 
+root
+():
+
+    
+return
+ {
+"message"
+: 
+"Welcome to the Au Pair Matching API"
+}
+# Health check endpoint
+
+@app.get(
+"/health"
+)
+
+async
+ 
+def
+ 
+health_check
+():
+
+    
+return
+ {
+"status"
+: 
+"healthy"
+}
+if
+ __name__ == 
+"__main__"
+:
+    
+import
+ uvicorn
+    uvicorn.run(app, host=
+"0.0.0.0"
+, port=
+8000
+)
+
+This code provides a complete FastAPI backend implementation with all the routes you requested:
+
+/api/dashboard/stats - Returns dashboard statistics
+/api/profile/completion - Returns profile completion information
+/api/matches/recent - Returns recent matches
+/api/matches - Returns all matches with pagination
+/api/conversations - Returns conversations with pagination
+/api/bookings - Returns bookings with pagination
+All routes return mock data in the format you specified:
+
+{
+  
+"status"
+: 
+"success"
+,
+  
+"data"
+: { ... }
+}
+
+The implementation includes:
+
+Proper route registration with the /api prefix
+Pydantic models for structured responses
+Mock data generation based on your database schema
+Pagination
