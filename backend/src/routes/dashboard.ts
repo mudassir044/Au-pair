@@ -1,11 +1,11 @@
 import express from 'express';
 import { prisma } from '../index';
-import { authenticateToken } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
 // Get dashboard statistics
-router.get('/stats', authenticateToken, async (req, res) => {
+router.get('/stats', authenticate, async (req, res) => {
   try {
     const userId = req.user.userId;
 

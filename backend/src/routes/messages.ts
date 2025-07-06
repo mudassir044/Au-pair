@@ -289,7 +289,7 @@ router.delete('/:messageId', async (req: AuthRequest, res) => {
 // Get conversations
 router.get('/conversations', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user!.id;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
