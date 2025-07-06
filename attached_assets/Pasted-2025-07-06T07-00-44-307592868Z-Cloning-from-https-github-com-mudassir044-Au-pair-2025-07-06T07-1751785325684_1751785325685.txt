@@ -1,0 +1,57 @@
+2025-07-06T07:00:44.307592868Z ==> Cloning from https://github.com/mudassir044/Au-pair
+2025-07-06T07:00:44.883726758Z ==> Checking out commit 670e35c0a5178c3bc342f9d63350398a12fb19a6 in branch main
+2025-07-06T07:00:45.933654803Z ==> Downloading cache...
+2025-07-06T07:00:58.496566998Z ==> Requesting Node.js version >=18.0.0
+2025-07-06T07:00:58.641901186Z ==> Using Node.js version 24.3.0 via ./backend/package.json
+2025-07-06T07:00:58.668286199Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-07-06T07:00:58.824061739Z ==> Using Bun version 1.1.0 (default)
+2025-07-06T07:00:58.824078989Z ==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+2025-07-06T07:00:58.884413693Z ==> Running build command 'cd backend && npm install && npx prisma generate && npx prisma db push && npm run build'...
+2025-07-06T07:01:02.545914457Z 
+2025-07-06T07:01:02.545941457Z > au-pair-backend@1.0.0 postinstall
+2025-07-06T07:01:02.545948307Z > npx prisma generate
+2025-07-06T07:01:02.545951797Z 
+2025-07-06T07:01:03.489220754Z Environment variables loaded from .env
+2025-07-06T07:01:03.490464377Z Prisma schema loaded from prisma/schema.prisma
+2025-07-06T07:01:03.705042382Z 
+2025-07-06T07:01:03.705093463Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 81ms
+2025-07-06T07:01:03.705098253Z 
+2025-07-06T07:01:03.705102363Z Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2025-07-06T07:01:03.705106033Z 
+2025-07-06T07:01:03.705109913Z Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+2025-07-06T07:01:03.705113424Z 
+2025-07-06T07:01:03.784032637Z 
+2025-07-06T07:01:03.784057148Z added 152 packages, and audited 153 packages in 5s
+2025-07-06T07:01:03.784084098Z 
+2025-07-06T07:01:03.784109849Z 17 packages are looking for funding
+2025-07-06T07:01:03.784122359Z   run `npm fund` for details
+2025-07-06T07:01:03.785031275Z 
+2025-07-06T07:01:03.785045916Z found 0 vulnerabilities
+2025-07-06T07:01:04.759691257Z Environment variables loaded from .env
+2025-07-06T07:01:04.760757576Z Prisma schema loaded from prisma/schema.prisma
+2025-07-06T07:01:04.96046964Z 
+2025-07-06T07:01:04.96049337Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 89ms
+2025-07-06T07:01:04.96050034Z 
+2025-07-06T07:01:04.96050653Z Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2025-07-06T07:01:04.9605127Z 
+2025-07-06T07:01:04.960518571Z Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+2025-07-06T07:01:04.960523761Z 
+2025-07-06T07:00:56.591556488Z ==> Transferred 93MB in 8s. Extraction took 1s.
+2025-07-06T07:01:05.856876019Z Environment variables loaded from .env
+2025-07-06T07:01:05.857885348Z Prisma schema loaded from prisma/schema.prisma
+2025-07-06T07:01:05.860433834Z Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-0-ap-southeast-1.pooler.supabase.com:5432"
+2025-07-06T07:01:13.217627795Z 
+2025-07-06T07:01:13.217653625Z The database is already in sync with the Prisma schema.
+2025-07-06T07:01:13.217870909Z 
+2025-07-06T07:01:13.218785336Z Running generate... (Use --skip-generate to skip the generators)
+2025-07-06T07:01:13.335822437Z Running generate... - Prisma Client
+2025-07-06T07:01:13.927315899Z ✔ Generated Prisma Client (v6.11.0) to ./node_modules/@prisma/client in 590ms
+2025-07-06T07:01:13.927476192Z 
+2025-07-06T07:01:14.051958289Z 
+2025-07-06T07:01:14.051980009Z > au-pair-backend@1.0.0 build
+2025-07-06T07:01:14.05198356Z > tsc && npx prisma generate
+2025-07-06T07:01:14.05198633Z 
+2025-07-06T07:01:17.612468752Z src/routes/dashboard.ts(3,10): error TS2724: '"../middleware/auth"' has no exported member named 'authenticateToken'. Did you mean 'authenticate'?
+2025-07-06T07:01:17.612682106Z src/routes/messages.ts(292,29): error TS2339: Property 'userId' does not exist on type '{ id: string; role: string; email: string; }'.
+2025-07-06T07:01:17.64897876Z ==> Build failed 😞
+2025-07-06T07:01:17.64899178Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
