@@ -1,4 +1,3 @@
-
 import express from 'express';
 import { prisma } from '../index';
 import { authenticateToken } from '../middleware/auth';
@@ -9,7 +8,7 @@ const router = express.Router();
 router.get('/stats', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
-    
+
     // Get user's matches count
     const totalMatches = await prisma.match.count({
       where: {
@@ -92,7 +91,7 @@ router.get('/stats', authenticateToken, async (req, res) => {
       if (profile.firstName) completedFields++;
       if (profile.lastName) completedFields++;
       if (profile.bio) completedFields++;
-      if (profile.location) completedFields++;
+      //if (profile.location) completedFields++;
       if (profile.dateOfBirth) completedFields++;
       if (profile.profilePhotoUrl) completedFields++;
       if (profile.languages && profile.languages.length > 0) completedFields++;

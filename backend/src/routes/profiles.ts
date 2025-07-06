@@ -1,6 +1,7 @@
 import express from 'express';
 import { prisma } from '../index';
 import { AuthRequest } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -247,10 +248,10 @@ router.delete('/me', async (req: AuthRequest, res) => {
 });
 
 // Get profile completion status
-router.get('/completion', authenticateToken, async (req, res) => {
+router.get('/completion', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user.userId;
-    
+    const userId = req.user!.id;
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -277,7 +278,6 @@ router.get('/completion', authenticateToken, async (req, res) => {
         { field: 'firstName', value: profile.firstName },
         { field: 'lastName', value: profile.lastName },
         { field: 'bio', value: profile.bio },
-        { field: 'location', value: profile.location },
         { field: 'dateOfBirth', value: profile.dateOfBirth },
         { field: 'profilePhotoUrl', value: profile.profilePhotoUrl },
         { field: 'languages', value: profile.languages?.length > 0 },
@@ -311,7 +311,7 @@ router.get('/completion', authenticateToken, async (req, res) => {
       profileType = user.role === 'AU_PAIR' ? 'au_pair' : 'host_family';
       completionPercentage = 0;
       missingFields = user.role === 'AU_PAIR' 
-        ? ['firstName', 'lastName', 'bio', 'location', 'dateOfBirth', 'profilePhotoUrl', 'languages', 'skills', 'experience', 'education']
+        ? ['firstName', 'lastName', 'bio', 'dateOfBirth', 'profilePhotoUrl', 'languages', 'skills', 'experience', 'education']
         : ['familyName', 'contactPersonName', 'bio', 'location', 'profilePhotoUrl', 'childrenAges', 'requirements', 'preferredLanguages'];
     }
 

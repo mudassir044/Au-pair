@@ -2,6 +2,7 @@ import express from 'express';
 import { prisma } from '../index';
 import { AuthRequest } from '../middleware/auth';
 import { findMatches, calculateMatchScore } from '../utils/matching';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -271,10 +272,10 @@ router.delete('/:matchId', async (req: AuthRequest, res) => {
 });
 
 // Get recent matches
-router.get('/recent', authenticateToken, async (req, res) => {
+router.get('/recent', authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user.userId;
-    
+    const userId = req.user!.id;
+
     const recentMatches = await prisma.match.findMany({
       where: {
         OR: [

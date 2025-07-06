@@ -1,6 +1,7 @@
 import express from 'express';
 import { prisma } from '../index';
 import { AuthRequest } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -286,7 +287,7 @@ router.delete('/:messageId', async (req: AuthRequest, res) => {
 });
 
 // Get conversations
-router.get('/conversations', authenticateToken, async (req, res) => {
+router.get('/conversations', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user.userId;
     const page = parseInt(req.query.page as string) || 1;
@@ -352,11 +353,11 @@ router.get('/conversations', authenticateToken, async (req, res) => {
 
     // Group by conversation partner
     const conversationMap = new Map();
-    
+
     conversations.forEach(message => {
       const partnerId = message.senderId === userId ? message.receiverId : message.senderId;
       const partner = message.senderId === userId ? message.receiver : message.sender;
-      
+
       if (!conversationMap.has(partnerId)) {
         conversationMap.set(partnerId, {
           id: `conv-${userId}-${partnerId}`,
