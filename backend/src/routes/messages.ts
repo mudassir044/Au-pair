@@ -285,4 +285,135 @@ router.delete('/:messageId', async (req: AuthRequest, res) => {
   }
 });
 
+// Get conversations
+router.get('/conversations', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    // Get unique conversation partners
+    const conversations = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: userId },
+          { receiverId: userId }
+        ]
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            auPairProfile: {
+              select: {
+                firstName: true,
+                lastName: true,
+                profilePhotoUrl: true
+              }
+            },
+            hostFamilyProfile: {
+              select: {
+                familyName: true,
+                contactPersonName: true,
+                profilePhotoUrl: true
+              }
+            }
+          }
+        },
+        receiver: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            auPairProfile: {
+              select: {
+                firstName: true,
+                lastName: true,
+                profilePhotoUrl: true
+              }
+            },
+            hostFamilyProfile: {
+              select: {
+                familyName: true,
+                contactPersonName: true,
+                profilePhotoUrl: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Group by conversation partner
+    const conversationMap = new Map();
+    
+    conversations.forEach(message => {
+      const partnerId = message.senderId === userId ? message.receiverId : message.senderId;
+      const partner = message.senderId === userId ? message.receiver : message.sender;
+      
+      if (!conversationMap.has(partnerId)) {
+        conversationMap.set(partnerId, {
+          id: `conv-${userId}-${partnerId}`,
+          with_user: {
+            id: partner.id,
+            name: partner.auPairProfile 
+              ? `${partner.auPairProfile.firstName || ''} ${partner.auPairProfile.lastName || ''}`.trim()
+              : partner.hostFamilyProfile?.familyName || partner.hostFamilyProfile?.contactPersonName || 'User',
+            role: partner.role,
+            profile_photo_url: partner.auPairProfile?.profilePhotoUrl || partner.hostFamilyProfile?.profilePhotoUrl
+          },
+          last_message: {
+            id: message.id,
+            content: message.content,
+            is_read: message.isRead,
+            created_at: message.createdAt
+          },
+          unread_count: 0
+        });
+      }
+    });
+
+    // Count unread messages for each conversation
+    for (const [partnerId, conversation] of conversationMap) {
+      const unreadCount = await prisma.message.count({
+        where: {
+          senderId: partnerId,
+          receiverId: userId,
+          isRead: false
+        }
+      });
+      conversation.unread_count = unreadCount;
+    }
+
+    const conversationArray = Array.from(conversationMap.values());
+    const total = conversationArray.length;
+    const paginatedConversations = conversationArray.slice(offset, offset + limit);
+
+    res.json({
+      status: 'success',
+      data: {
+        conversations: paginatedConversations,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch conversations'
+    });
+  }
+});
+
 export default router;

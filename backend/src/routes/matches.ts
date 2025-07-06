@@ -270,4 +270,88 @@ router.delete('/:matchId', async (req: AuthRequest, res) => {
   }
 });
 
+// Get recent matches
+router.get('/recent', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    const recentMatches = await prisma.match.findMany({
+      where: {
+        OR: [
+          { hostId: userId },
+          { auPairId: userId }
+        ]
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 5,
+      include: {
+        host: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            hostFamilyProfile: {
+              select: {
+                familyName: true,
+                contactPersonName: true,
+                profilePhotoUrl: true
+              }
+            }
+          }
+        },
+        auPair: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            auPairProfile: {
+              select: {
+                firstName: true,
+                lastName: true,
+                profilePhotoUrl: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const formattedMatches = recentMatches.map(match => ({
+      id: match.id,
+      host: {
+        id: match.host.id,
+        name: match.host.hostFamilyProfile?.familyName || match.host.hostFamilyProfile?.contactPersonName || 'Host Family',
+        role: match.host.role,
+        profile_photo_url: match.host.hostFamilyProfile?.profilePhotoUrl
+      },
+      au_pair: {
+        id: match.auPair.id,
+        name: `${match.auPair.auPairProfile?.firstName || ''} ${match.auPair.auPairProfile?.lastName || ''}`.trim() || 'Au Pair',
+        role: match.auPair.role,
+        profile_photo_url: match.auPair.auPairProfile?.profilePhotoUrl
+      },
+      match_score: match.matchScore,
+      status: match.status,
+      initiated_by: match.initiatedBy,
+      created_at: match.createdAt,
+      updated_at: match.updatedAt
+    }));
+
+    res.json({
+      status: 'success',
+      data: {
+        matches: formattedMatches
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching recent matches:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch recent matches'
+    });
+  }
+});
+
 export default router;

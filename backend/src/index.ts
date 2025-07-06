@@ -20,6 +20,7 @@ import documentsRoutes from './routes/documents';
 import bookingsRoutes from './routes/bookings';
 import calendarRoutes from './routes/calendar';
 import adminRoutes from './routes/admin';
+import dashboardRoutes from './routes/dashboard';
 
 // Import socket handlers
 import { setupMessageHandlers } from './sockets/messageHandlers';
@@ -100,6 +101,7 @@ app.use('/api/documents', documentsRoutes);
 app.use('/api/bookings', bookingsRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

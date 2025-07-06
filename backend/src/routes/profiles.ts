@@ -246,4 +246,90 @@ router.delete('/me', async (req: AuthRequest, res) => {
   }
 });
 
+// Get profile completion status
+router.get('/completion', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        auPairProfile: true,
+        hostFamilyProfile: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    let profileType = '';
+    let completionPercentage = 0;
+    let missingFields: string[] = [];
+
+    if (user.auPairProfile) {
+      profileType = 'au_pair';
+      const profile = user.auPairProfile;
+      const requiredFields = [
+        { field: 'firstName', value: profile.firstName },
+        { field: 'lastName', value: profile.lastName },
+        { field: 'bio', value: profile.bio },
+        { field: 'location', value: profile.location },
+        { field: 'dateOfBirth', value: profile.dateOfBirth },
+        { field: 'profilePhotoUrl', value: profile.profilePhotoUrl },
+        { field: 'languages', value: profile.languages?.length > 0 },
+        { field: 'skills', value: profile.skills?.length > 0 },
+        { field: 'experience', value: profile.experience },
+        { field: 'education', value: profile.education }
+      ];
+
+      const completedFields = requiredFields.filter(f => f.value).length;
+      completionPercentage = Math.round((completedFields / requiredFields.length) * 100);
+      missingFields = requiredFields.filter(f => !f.value).map(f => f.field);
+    } else if (user.hostFamilyProfile) {
+      profileType = 'host_family';
+      const profile = user.hostFamilyProfile;
+      const requiredFields = [
+        { field: 'familyName', value: profile.familyName },
+        { field: 'contactPersonName', value: profile.contactPersonName },
+        { field: 'bio', value: profile.bio },
+        { field: 'location', value: profile.location },
+        { field: 'profilePhotoUrl', value: profile.profilePhotoUrl },
+        { field: 'childrenAges', value: profile.childrenAges?.length > 0 },
+        { field: 'requirements', value: profile.requirements },
+        { field: 'preferredLanguages', value: profile.preferredLanguages?.length > 0 }
+      ];
+
+      const completedFields = requiredFields.filter(f => f.value).length;
+      completionPercentage = Math.round((completedFields / requiredFields.length) * 100);
+      missingFields = requiredFields.filter(f => !f.value).map(f => f.field);
+    } else {
+      // No profile created yet
+      profileType = user.role === 'AU_PAIR' ? 'au_pair' : 'host_family';
+      completionPercentage = 0;
+      missingFields = user.role === 'AU_PAIR' 
+        ? ['firstName', 'lastName', 'bio', 'location', 'dateOfBirth', 'profilePhotoUrl', 'languages', 'skills', 'experience', 'education']
+        : ['familyName', 'contactPersonName', 'bio', 'location', 'profilePhotoUrl', 'childrenAges', 'requirements', 'preferredLanguages'];
+    }
+
+    res.json({
+      status: 'success',
+      data: {
+        completion_percentage: completionPercentage,
+        missing_fields: missingFields,
+        profile_type: profileType
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching profile completion:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch profile completion'
+    });
+  }
+});
+
 export default router;
