@@ -48,10 +48,12 @@ model User {
   role            UserRole
   isActive        Boolean  @default(true)
   isEmailVerified Boolean  @default(false)
-  emailVerifyToken String? 
+  emailVerifyToken String?
   resetPasswordToken String?
   resetPasswordExpires DateTime?
   lastLogin       DateTime?
+  preferredlanguage String?
+  profilecompleted Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

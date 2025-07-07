@@ -20,8 +20,7 @@
     "prisma:migrate": "prisma migrate dev",
     "test": "echo \"No tests specified\" && exit 0",
     "lint": "echo \"No linting configured\" && exit 0",
-    "production": "npm run build && npm start",
-    "deploy": "npx prisma migrate deploy && npm run build"
+    "production": "npm run build && npm start"
   },
   "dependencies": {
     "@prisma/client": "^6.11.0",
