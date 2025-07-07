@@ -7,7 +7,7 @@ import { checkPlanLimits } from "../middleware/planLimits";
 const router = express.Router();
 
 // Get conversations for current user
-router.get("/conversations", async (req: AuthRequest, res) => {
+router.get("/conversations", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
 
@@ -117,11 +117,9 @@ router.get("/:userId", async (req: AuthRequest, res) => {
     });
 
     if (!match) {
-      return res
-        .status(403)
-        .json({
-          message: "You can only message users you have an approved match with",
-        });
+      return res.status(403).json({
+        message: "You can only message users you have an approved match with",
+      });
     }
 
     const messages = await prisma.message.findMany({
@@ -215,12 +213,9 @@ router.post(
       });
 
       if (!match) {
-        return res
-          .status(403)
-          .json({
-            message:
-              "You can only message users you have an approved match with",
-          });
+        return res.status(403).json({
+          message: "You can only message users you have an approved match with",
+        });
       }
 
       const message = await prisma.message.create({
