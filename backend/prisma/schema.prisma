@@ -69,7 +69,7 @@ model User {
   planType        PlanType @default(FREE)
   planRole        PlanRole?
   planExpiry      DateTime?
-  addOns          String[] @default([])
+  addOns          String   @default("[]")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
