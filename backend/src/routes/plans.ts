@@ -124,7 +124,7 @@ router.post(
           planType: planType,
           planRole: role,
           planExpiry: planExpiry,
-          addOns: addOns,
+          addOns: JSON.stringify(addOns),
           updatedAt: new Date(),
         },
         select: {
@@ -146,7 +146,10 @@ router.post(
 
       res.json({
         message: "Plan upgraded successfully",
-        user: updatedUser,
+        user: {
+          ...updatedUser,
+          addOns: JSON.parse(updatedUser.addOns),
+        },
         planDetails: {
           type: planType,
           role: role,
@@ -208,7 +211,7 @@ router.get(
           type: user.planType,
           role: user.planRole,
           expiry: user.planExpiry,
-          addOns: user.addOns,
+          addOns: JSON.parse(user.addOns),
           isExpired: isExpired,
           daysRemaining: user.planExpiry
             ? Math.max(
