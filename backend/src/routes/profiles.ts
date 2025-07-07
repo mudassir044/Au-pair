@@ -7,7 +7,7 @@ import { checkPlanLimits } from "../middleware/planLimits";
 const router = express.Router();
 
 // Create or update Au Pair profile
-router.post("/au-pair", async (req: AuthRequest, res) => {
+router.post("/au-pair", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const {
@@ -95,7 +95,7 @@ router.post("/au-pair", async (req: AuthRequest, res) => {
 });
 
 // Create or update Host Family profile
-router.post("/host-family", async (req: AuthRequest, res) => {
+router.post("/host-family", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const {
@@ -244,7 +244,7 @@ router.get(
 );
 
 // Delete current user's profile
-router.delete("/me", async (req: AuthRequest, res) => {
+router.delete("/me", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
