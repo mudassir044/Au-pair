@@ -626,6 +626,7 @@ router.get(
 
         return {
           ...user,
+          addOns: JSON.parse(user.addOns),
           planStatus: {
             isExpired,
             daysRemaining,
@@ -722,7 +723,7 @@ router.put(
       const updateData: any = {};
       if (planType !== undefined) updateData.planType = planType;
       if (planRole !== undefined) updateData.planRole = planRole;
-      if (addOns !== undefined) updateData.addOns = addOns;
+      if (addOns !== undefined) updateData.addOns = JSON.stringify(addOns);
       if (newExpiry !== undefined) updateData.planExpiry = newExpiry;
 
       const updatedUser = await prisma.user.update({
@@ -746,7 +747,10 @@ router.put(
 
       res.json({
         message: "User plan updated successfully",
-        user: updatedUser,
+        user: {
+          ...updatedUser,
+          addOns: JSON.parse(updatedUser.addOns),
+        },
       });
     } catch (error: any) {
       console.error("Update user plan error:", error);
