@@ -30,11 +30,9 @@ router.post("/au-pair", async (req: AuthRequest, res) => {
 
     // Validation
     if (!firstName || !lastName || !dateOfBirth) {
-      return res
-        .status(400)
-        .json({
-          message: "First name, last name, and date of birth are required",
-        });
+      return res.status(400).json({
+        message: "First name, last name, and date of birth are required",
+      });
     }
 
     // Check if user is an au pair
@@ -136,11 +134,9 @@ router.post("/host-family", async (req: AuthRequest, res) => {
     });
 
     if (!user || user.role !== "HOST_FAMILY") {
-      return res
-        .status(403)
-        .json({
-          message: "Only host families can create host family profiles",
-        });
+      return res.status(403).json({
+        message: "Only host families can create host family profiles",
+      });
     }
 
     // Create or update profile
@@ -185,7 +181,7 @@ router.post("/host-family", async (req: AuthRequest, res) => {
 });
 
 // Get current user's profile
-router.get("/me", async (req: AuthRequest, res) => {
+router.get("/me", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
