@@ -1,75 +1,60 @@
-import express from 'express';
-import { prisma } from '../index';
-import { authenticate } from '../middleware/auth';
+import express from "express";
+import { prisma } from "../index";
+import { authenticate, AuthRequest } from "../middleware/auth";
 
 const router = express.Router();
 
 // Get dashboard statistics
-router.get('/stats', authenticate, async (req, res) => {
+router.get("/stats", authenticate, async (req: AuthRequest, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user!.id;
 
     // Get user's matches count
     const totalMatches = await prisma.match.count({
       where: {
-        OR: [
-          { hostId: userId },
-          { auPairId: userId }
-        ]
-      }
+        OR: [{ hostId: userId }, { auPairId: userId }],
+      },
     });
 
     const pendingMatches = await prisma.match.count({
       where: {
-        OR: [
-          { hostId: userId },
-          { auPairId: userId }
-        ],
-        status: 'PENDING'
-      }
+        OR: [{ hostId: userId }, { auPairId: userId }],
+        status: "PENDING",
+      },
     });
 
     const approvedMatches = await prisma.match.count({
       where: {
-        OR: [
-          { hostId: userId },
-          { auPairId: userId }
-        ],
-        status: 'APPROVED'
-      }
+        OR: [{ hostId: userId }, { auPairId: userId }],
+        status: "APPROVED",
+      },
     });
 
     // Get user's bookings count
     const totalBookings = await prisma.booking.count({
       where: {
-        OR: [
-          { hostId: userId },
-          { auPairId: userId }
-        ]
-      }
+        OR: [{ hostId: userId }, { auPairId: userId }],
+      },
     });
 
     const upcomingBookings = await prisma.booking.count({
       where: {
-        OR: [
-          { hostId: userId },
-          { auPairId: userId }
-        ],
+        OR: [{ hostId: userId }, { auPairId: userId }],
         scheduledDate: {
-          gte: new Date()
+          gte: new Date(),
         },
         status: {
-          in: ['PENDING', 'APPROVED']
-        }
-      }
+          in: ["PENDING", "APPROVED"],
+        },
+      },
     });
 
     // Get unread messages count
     const unreadMessages = await prisma.message.count({
       where: {
         receiverId: userId,
-        isRead: false
-      }
+        isRead: false,
+      },
     });
 
     // Calculate profile completion percentage
@@ -77,8 +62,8 @@ router.get('/stats', authenticate, async (req, res) => {
       where: { id: userId },
       include: {
         auPairProfile: true,
-        hostFamilyProfile: true
-      }
+        hostFamilyProfile: true,
+      },
     });
 
     let profileCompletion = 50; // Base completion for having an account
@@ -110,9 +95,11 @@ router.get('/stats', authenticate, async (req, res) => {
       if (profile.bio) completedFields++;
       if (profile.location) completedFields++;
       if (profile.profilePhotoUrl) completedFields++;
-      if (profile.childrenAges && profile.childrenAges.length > 0) completedFields++;
+      if (profile.childrenAges && profile.childrenAges.length > 0)
+        completedFields++;
       if (profile.requirements) completedFields++;
-      if (profile.preferredLanguages && profile.preferredLanguages.length > 0) completedFields++;
+      if (profile.preferredLanguages && profile.preferredLanguages.length > 0)
+        completedFields++;
 
       profileCompletion = Math.round((completedFields / totalFields) * 100);
     }
@@ -124,18 +111,18 @@ router.get('/stats', authenticate, async (req, res) => {
       total_bookings: totalBookings,
       upcoming_bookings: upcomingBookings,
       unread_messages: unreadMessages,
-      profile_completion: profileCompletion
+      profile_completion: profileCompletion,
     };
 
     res.json({
-      status: 'success',
-      data: stats
+      status: "success",
+      data: stats,
     });
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
+    console.error("Error fetching dashboard stats:", error);
     res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch dashboard statistics'
+      status: "error",
+      message: "Failed to fetch dashboard statistics",
     });
   }
 });
