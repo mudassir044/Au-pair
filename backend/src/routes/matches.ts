@@ -23,7 +23,7 @@ router.get("/potential", authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get user's existing matches
-router.get("/my-matches", async (req: AuthRequest, res) => {
+router.get("/my-matches", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const status = req.query.status as string;
