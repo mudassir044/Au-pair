@@ -23,7 +23,7 @@
     "production": "npm run build && npm start"
   },
   "dependencies": {
-    "@prisma/client": "^6.11.0",
+    "@prisma/client": "^6.11.1",
     "@supabase/supabase-js": "^2.50.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -34,7 +34,6 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "nodemailer": "^7.0.4",
-    "prisma": "^6.11.0",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
@@ -48,6 +47,7 @@
     "@types/nodemailer": "^6.4.17",
     "concurrently": "^9.2.0",
     "nodemon": "^3.1.10",
+    "prisma": "^6.11.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
