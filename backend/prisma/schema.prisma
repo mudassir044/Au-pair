@@ -14,6 +14,18 @@ enum UserRole {
   ADMIN
 }
 
+enum PlanType {
+  FREE
+  STANDARD
+  PREMIUM
+  VERIFIED
+}
+
+enum PlanRole {
+  FAMILY
+  AU_PAIR
+}
+
 enum MatchStatus {
   PENDING
   APPROVED
@@ -54,6 +66,10 @@ model User {
   lastLogin       DateTime?
   preferredlanguage String?
   profilecompleted Boolean  @default(false)
+  planType        PlanType @default(FREE)
+  planRole        PlanRole?
+  planExpiry      DateTime?
+  addOns          String[] @default([])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
