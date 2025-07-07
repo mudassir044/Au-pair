@@ -4,14 +4,26 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 enum UserRole {
   AU_PAIR
   HOST_FAMILY
   ADMIN
+}
+
+enum PlanType {
+  FREE
+  STANDARD
+  PREMIUM
+  VERIFIED
+}
+
+enum PlanRole {
+  FAMILY
+  AU_PAIR
 }
 
 enum MatchStatus {
@@ -54,6 +66,10 @@ model User {
   lastLogin       DateTime?
   preferredlanguage String?
   profilecompleted Boolean  @default(false)
+  planType        PlanType @default(FREE)
+  planRole        PlanRole?
+  planExpiry      DateTime?
+  addOns          String   @default("[]")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
