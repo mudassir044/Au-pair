@@ -8,7 +8,7 @@ import { checkPlanLimits } from "../middleware/planLimits";
 const router = express.Router();
 
 // Get potential matches for current user
-router.get("/potential", async (req: AuthRequest, res) => {
+router.get("/potential", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const limit = parseInt(req.query.limit as string) || 20;
