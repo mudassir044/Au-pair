@@ -287,18 +287,3 @@ export async function checkUserPlanAccess(
     return { allowed: false, reason: "Error checking plan access" };
   }
 }
-
-// Extend AuthRequest interface to include plan info
-declare global {
-  namespace Express {
-    interface Request {
-      planInfo?: {
-        planType: string;
-        planRole: string;
-        isExpired: boolean;
-        limits: any;
-        currentUsage: any;
-      };
-    }
-  }
-}
