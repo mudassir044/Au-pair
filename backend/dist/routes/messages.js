@@ -22,8 +22,8 @@ router.get("/conversations", auth_1.authenticate, async (req, res) => {
         content,
         isRead,
         createdAt,
-        sender:users!senderId(id, email),
-        receiver:users!receiverId(id, email)
+        senderData:users!senderId(id, email),
+        receiverData:users!receiverId(id, email)
       `)
             .or(`senderId.eq.${userId},receiverId.eq.${userId}`)
             .order("createdAt", { ascending: false });
@@ -35,7 +35,7 @@ router.get("/conversations", auth_1.authenticate, async (req, res) => {
         const conversationsMap = new Map();
         for (const message of messages) {
             const partnerId = message.senderId === userId ? message.receiverId : message.senderId;
-            const partnerData = message.senderId === userId ? message.receiver : message.sender;
+            const partnerData = message.senderId === userId ? message.receiverData : message.senderData;
             if (!conversationsMap.has(partnerId)) {
                 conversationsMap.set(partnerId, {
                     partnerId,
