@@ -24,6 +24,7 @@ import calendarRoutes from "./routes/calendar";
 import adminRoutes from "./routes/admin";
 import dashboardRoutes from "./routes/dashboard";
 import plansRoutes from "./routes/plans";
+import healthRoutes from "./routes/health";
 
 // Import socket handlers
 import { setupMessageHandlers } from "./sockets/messageHandlers";
@@ -101,6 +102,9 @@ app.get("/health", (req, res) => {
     environment: process.env.NODE_ENV,
   });
 });
+
+// Health check (no authentication required)
+app.use("/health", healthRoutes);
 
 // API Routes
 app.use("/api/auth", authRoutes);
