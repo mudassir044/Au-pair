@@ -23,6 +23,7 @@ export interface AuthRequest extends Request {
     body: any;
     params: any;
     query: any;
+    headers: any;
 }
 export declare const authenticate: (req: AuthRequest, res: Response, next: NextFunction) => Promise<Response<any, Record<string, any>>>;
 export declare const authorize: (...roles: string[]) => (req: AuthRequest, res: Response, next: NextFunction) => Response<any, Record<string, any>>;
