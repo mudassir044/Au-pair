@@ -2,15 +2,31 @@ import { createClient } from "@supabase/supabase-js";
 import multer from "multer";
 import * as Express from "express";
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.warn(
+    "⚠️  WARNING: Missing Supabase configuration. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env file",
+  );
+  console.warn(
+    "⚠️  The application will not function properly without these environment variables",
+  );
+}
 
 // Use service role key for backend operations to bypass RLS
-export const supabase = createClient(supabaseUrl, supabaseServiceKey);
+export const supabase =
+  supabaseUrl && supabaseServiceKey
+    ? createClient(supabaseUrl, supabaseServiceKey)
+    : null;
 
 // Database connection check
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
+    if (!supabase) {
+      console.error("❌ Supabase client not initialized");
+      return false;
+    }
     const { data, error } = await supabase
       .from("users")
       .select("count")
