@@ -79,27 +79,21 @@ router.get('/bookings', async (req, res) => {
                 ]
             },
             include: {
-                requester: {
+                auPair: {
                     select: {
                         id: true,
                         email: true,
                         role: true,
                         auPairProfile: {
                             select: { firstName: true, lastName: true }
-                        },
-                        hostFamilyProfile: {
-                            select: { familyName: true, contactPersonName: true }
                         }
                     }
                 },
-                receiver: {
+                host: {
                     select: {
                         id: true,
                         email: true,
                         role: true,
-                        auPairProfile: {
-                            select: { firstName: true, lastName: true }
-                        },
                         hostFamilyProfile: {
                             select: { familyName: true, contactPersonName: true }
                         }
@@ -145,37 +139,32 @@ router.post('/bookings', async (req, res) => {
         }
         const booking = await index_1.prisma.booking.create({
             data: {
+                auPairId: req.user.role === 'AU_PAIR' ? requesterId : receiverId,
+                hostId: req.user.role === 'HOST_FAMILY' ? requesterId : receiverId,
                 requesterId,
                 receiverId,
                 scheduledDate: new Date(scheduledDate),
-                scheduledTime,
-                duration: duration || 60,
+                startDate: new Date(scheduledDate),
+                endDate: new Date(scheduledDate),
+                totalHours: duration || 1,
                 notes,
-                bookingType: bookingType || 'INTERVIEW',
                 status: 'PENDING'
             },
             include: {
-                requester: {
+                auPair: {
                     select: {
                         id: true,
                         email: true,
-                        role: true,
                         auPairProfile: {
                             select: { firstName: true, lastName: true }
-                        },
-                        hostFamilyProfile: {
-                            select: { familyName: true, contactPersonName: true }
                         }
                     }
                 },
-                receiver: {
+                host: {
                     select: {
                         id: true,
                         email: true,
                         role: true,
-                        auPairProfile: {
-                            select: { firstName: true, lastName: true }
-                        },
                         hostFamilyProfile: {
                             select: { familyName: true, contactPersonName: true }
                         }
@@ -219,27 +208,20 @@ router.put('/bookings/:bookingId', async (req, res) => {
                 notes: notes || booking.notes
             },
             include: {
-                requester: {
+                auPair: {
                     select: {
                         id: true,
                         email: true,
-                        role: true,
                         auPairProfile: {
                             select: { firstName: true, lastName: true }
-                        },
-                        hostFamilyProfile: {
-                            select: { familyName: true, contactPersonName: true }
                         }
                     }
                 },
-                receiver: {
+                host: {
                     select: {
                         id: true,
                         email: true,
                         role: true,
-                        auPairProfile: {
-                            select: { firstName: true, lastName: true }
-                        },
                         hostFamilyProfile: {
                             select: { familyName: true, contactPersonName: true }
                         }
