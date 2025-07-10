@@ -98,7 +98,7 @@ router.post("/register", async (req, res) => {
     }
 
     // Create new demo user
-    const newUser = {
+    const newUser: any = {
       id: uuidv4(),
       email,
       password: "$2b$12$hashedpassword",

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteFromSupabase = exports.uploadToSupabase = exports.upload = exports.dbClient = exports.supabase = void 0;
+exports.deleteFromSupabase = exports.uploadToSupabase = exports.upload = exports.isDemoMode = exports.supabase = void 0;
 exports.checkDatabaseConnection = checkDatabaseConnection;
 const supabase_js_1 = require("@supabase/supabase-js");
 const multer_1 = __importDefault(require("multer"));
@@ -11,21 +11,19 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !supabaseServiceKey) {
     console.warn("⚠️  WARNING: Missing Supabase configuration. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env file");
-    console.warn("⚠️  The application will not function properly without these environment variables");
+    console.warn("⚠️  The application will use demo mode with mock data");
 }
 // Use service role key for backend operations to bypass RLS
 exports.supabase = supabaseUrl && supabaseServiceKey
     ? (0, supabase_js_1.createClient)(supabaseUrl, supabaseServiceKey)
     : null;
-// Import mock for demo mode
-const mockSupabase_1 = require("./mockSupabase");
-// Export the client to use (real or mock)
-exports.dbClient = exports.supabase || mockSupabase_1.mockSupabase;
+// Demo mode flag
+exports.isDemoMode = !exports.supabase;
 // Database connection check
 async function checkDatabaseConnection() {
     try {
         if (!exports.supabase) {
-            console.log("📊 Using demo database (mock Supabase)");
+            console.log("📊 Using demo database mode (no Supabase credentials)");
             return true;
         }
         const { data, error } = await exports.supabase
@@ -39,8 +37,8 @@ async function checkDatabaseConnection() {
     }
     catch (error) {
         console.error("❌ Supabase database connection failed:", error);
-        console.log("📊 Falling back to demo database (mock Supabase)");
-        return true;
+        console.log("📊 Application will continue in demo mode");
+        return true; // Continue in demo mode
     }
 }
 // Configure multer for file uploads
@@ -69,6 +67,10 @@ exports.upload = (0, multer_1.default)({
     },
 });
 const uploadToSupabase = async (file, userId, bucket) => {
+    if (exports.isDemoMode) {
+        // Return a demo URL
+        return `https://demo.supabase.co/storage/v1/object/public/${bucket}/${userId}/${file.originalname}`;
+    }
     try {
         const filename = `${userId}/${Date.now()}_${file.originalname}`;
         const { data, error } = await exports.supabase.storage
@@ -91,6 +93,10 @@ const uploadToSupabase = async (file, userId, bucket) => {
 };
 exports.uploadToSupabase = uploadToSupabase;
 const deleteFromSupabase = async (url) => {
+    if (exports.isDemoMode) {
+        console.log("📁 Demo mode: File delete simulated");
+        return;
+    }
     try {
         // Extract file path from URL
         const urlParts = url.split("/storage/v1/object/public/uploads/");
@@ -98,7 +104,9 @@ const deleteFromSupabase = async (url) => {
             throw new Error("Invalid file URL");
         }
         const filePath = urlParts[1];
-        const { error } = await exports.supabase.storage.from("uploads").remove([filePath]);
+        const { error } = await exports.supabase.storage
+            .from("uploads")
+            .remove([filePath]);
         if (error) {
             console.error("Supabase delete error:", error);
             throw new Error(`Delete failed: ${error.message}`);

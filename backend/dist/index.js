@@ -29,6 +29,7 @@ const admin_1 = __importDefault(require("./routes/admin"));
 const dashboard_1 = __importDefault(require("./routes/dashboard"));
 const plans_1 = __importDefault(require("./routes/plans"));
 const health_1 = __importDefault(require("./routes/health"));
+const demo_1 = __importDefault(require("./routes/demo"));
 // Import socket handlers
 const messageHandlers_1 = require("./sockets/messageHandlers");
 const app = (0, express_1.default)();
@@ -92,6 +93,8 @@ app.get("/health", (req, res) => {
 });
 // Health check (no authentication required)
 app.use("/health", health_1.default);
+// Demo routes (no authentication required)
+app.use("/api/demo", demo_1.default);
 // API Routes
 app.use("/api/auth", auth_1.default);
 app.use("/api/users", users_1.default);
