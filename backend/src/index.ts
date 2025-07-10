@@ -93,6 +93,36 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+// Root endpoint - API information
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "🎉 Au-Pair Backend API",
+    service: "au-pair-backend",
+    version: "1.0.0",
+    environment: process.env.NODE_ENV,
+    endpoints: {
+      health: "/health",
+      demo: "/api/demo",
+      auth: "/api/auth",
+      users: "/api/users",
+      profiles: "/api/profiles",
+      matches: "/api/matches",
+      messages: "/api/messages",
+      documents: "/api/documents",
+      bookings: "/api/bookings",
+      calendar: "/api/calendar",
+      admin: "/api/admin",
+      dashboard: "/api/dashboard",
+      plans: "/api/plans",
+    },
+    demo_credentials: {
+      au_pair: "sarah@demo.com / any_password",
+      host_family: "mueller@demo.com / any_password",
+    },
+    documentation: "Check /api/demo/endpoints for detailed API documentation",
+  });
+});
+
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({
