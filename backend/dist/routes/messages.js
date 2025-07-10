@@ -39,7 +39,7 @@ router.get("/conversations", auth_1.authenticate, async (req, res) => {
             if (!conversationsMap.has(partnerId)) {
                 conversationsMap.set(partnerId, {
                     partnerId,
-                    partnerEmail: partnerData.email,
+                    partnerEmail: partnerData?.email || "Unknown",
                     lastMessage: message,
                     unreadCount: 0,
                     messages: [],

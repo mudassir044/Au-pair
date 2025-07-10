@@ -10,21 +10,10 @@ router.get("/conversations", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
 
-    // Get all conversations where user is sender or receiver
+    // Get all messages where user is sender or receiver
     const { data: messages, error } = await supabase
       .from("messages")
-      .select(
-        `
-        id,
-        senderId,
-        receiverId,
-        content,
-        isRead,
-        createdAt,
-        senderData:users!senderId(id, email),
-        receiverData:users!receiverId(id, email)
-      `,
-      )
+      .select("id, senderId, receiverId, content, isRead, createdAt")
       .or(`senderId.eq.${userId},receiverId.eq.${userId}`)
       .order("createdAt", { ascending: false });
 
@@ -39,13 +28,10 @@ router.get("/conversations", authenticate, async (req: AuthRequest, res) => {
     for (const message of messages) {
       const partnerId =
         message.senderId === userId ? message.receiverId : message.senderId;
-      const partnerData =
-        message.senderId === userId ? message.receiverData : message.senderData;
 
       if (!conversationsMap.has(partnerId)) {
         conversationsMap.set(partnerId, {
           partnerId,
-          partnerEmail: partnerData?.email || "Unknown",
           lastMessage: message,
           unreadCount: 0,
           messages: [],
@@ -64,7 +50,23 @@ router.get("/conversations", authenticate, async (req: AuthRequest, res) => {
 
     // Convert map to array and get partner profiles
     const conversations = await Promise.all(
-      Array.from(conversationsMap.values()).map(async (conversation) => {
+      Array.from(conversationsMap.values()).map(async (conversation: any) => {
+        // Get partner user info
+        const { data: partnerUser, error: userError } = await supabase
+          .from("users")
+          .select("id, email, role")
+          .eq("id", conversation.partnerId)
+          .single();
+
+        if (userError || !partnerUser) {
+          return {
+            ...conversation,
+            partnerName: "Unknown User",
+            partnerEmail: "unknown@email.com",
+            partnerPhoto: null,
+          };
+        }
+
         // Get partner profile information
         const { data: auPairProfile } = await supabase
           .from("au_pair_profiles")
@@ -81,11 +83,12 @@ router.get("/conversations", authenticate, async (req: AuthRequest, res) => {
         const profile = auPairProfile || hostProfile;
         const partnerName = auPairProfile
           ? `${auPairProfile.firstName} ${auPairProfile.lastName}`
-          : hostProfile?.familyName || conversation.partnerEmail;
+          : hostProfile?.familyName || partnerUser.email;
 
         return {
           ...conversation,
           partnerName,
+          partnerEmail: partnerUser.email,
           partnerPhoto: profile?.profilePhotoUrl || null,
           messages: conversation.messages.slice(0, 1), // Only include last message for conversation list
         };
@@ -111,16 +114,7 @@ router.get("/with/:userId", authenticate, async (req: AuthRequest, res) => {
     // Get messages between current user and other user
     const { data: messages, error } = await supabase
       .from("messages")
-      .select(
-        `
-        id,
-        senderId,
-        receiverId,
-        content,
-        isRead,
-        createdAt
-      `,
-      )
+      .select("id, senderId, receiverId, content, isRead, createdAt")
       .or(
         `and(senderId.eq.${currentUserId},receiverId.eq.${otherUserId}),and(senderId.eq.${otherUserId},receiverId.eq.${currentUserId})`,
       )
