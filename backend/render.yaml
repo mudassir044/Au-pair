@@ -2,11 +2,9 @@ services:
   - type: web
     name: au-pair-backend
     env: node
-    plan: free
-    buildCommand: npm install && npm run build
+    plan: starter
+    buildCommand: npm run render-build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: FRONTEND_URL
-        value: https://au-pair.netlify.app

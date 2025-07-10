@@ -4,258 +4,205 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const index_1 = require("../index");
+const uuid_1 = require("uuid");
+const supabase_1 = require("../utils/supabase");
+const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
-// Get conversations for current user
-router.get('/conversations', async (req, res) => {
+// Get conversations list
+router.get("/conversations", auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
         // Get all messages where user is sender or receiver
-        const messages = await index_1.prisma.message.findMany({
-            where: {
-                OR: [
-                    { senderId: userId },
-                    { receiverId: userId }
-                ]
-            },
-            include: {
-                sender: {
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        auPairProfile: {
-                            select: { firstName: true, lastName: true, profilePhotoUrl: true }
-                        },
-                        hostFamilyProfile: {
-                            select: { familyName: true, contactPersonName: true, profilePhotoUrl: true }
-                        }
-                    }
-                },
-                receiver: {
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        auPairProfile: {
-                            select: { firstName: true, lastName: true, profilePhotoUrl: true }
-                        },
-                        hostFamilyProfile: {
-                            select: { familyName: true, contactPersonName: true, profilePhotoUrl: true }
-                        }
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
-        // Group messages by conversation (other user)
+        const { data: messages, error } = await supabase_1.supabase
+            .from("messages")
+            .select("id, senderId, receiverId, content, isRead, createdAt")
+            .or(`senderId.eq.${userId},receiverId.eq.${userId}`)
+            .order("createdAt", { ascending: false });
+        if (error) {
+            console.error("❌ Error fetching conversations:", error);
+            return res.status(500).json({ message: "Error fetching conversations" });
+        }
+        // Group messages by conversation partner
         const conversationsMap = new Map();
-        messages.forEach(message => {
-            const otherUserId = message.senderId === userId ? message.receiverId : message.senderId;
-            const otherUser = message.senderId === userId ? message.receiver : message.sender;
-            if (!conversationsMap.has(otherUserId)) {
-                conversationsMap.set(otherUserId, {
-                    userId: otherUserId,
-                    user: otherUser,
+        for (const message of messages) {
+            const partnerId = message.senderId === userId ? message.receiverId : message.senderId;
+            if (!conversationsMap.has(partnerId)) {
+                conversationsMap.set(partnerId, {
+                    partnerId,
                     lastMessage: message,
-                    unreadCount: 0
+                    unreadCount: 0,
+                    messages: [],
                 });
             }
+            const conversation = conversationsMap.get(partnerId);
             // Count unread messages (messages sent to current user that are unread)
             if (message.receiverId === userId && !message.isRead) {
-                const conversation = conversationsMap.get(otherUserId);
                 conversation.unreadCount++;
             }
-        });
-        const conversations = Array.from(conversationsMap.values());
-        res.json({ conversations });
+            conversation.messages.push(message);
+        }
+        // Convert map to array and get partner profiles
+        const conversations = await Promise.all(Array.from(conversationsMap.values()).map(async (conversation) => {
+            // Get partner user info
+            const { data: partnerUser, error: userError } = await supabase_1.supabase
+                .from("users")
+                .select("id, email, role")
+                .eq("id", conversation.partnerId)
+                .single();
+            if (userError || !partnerUser) {
+                return {
+                    ...conversation,
+                    partnerName: "Unknown User",
+                    partnerEmail: "unknown@email.com",
+                    partnerPhoto: null,
+                };
+            }
+            // Get partner profile information
+            const { data: auPairProfile } = await supabase_1.supabase
+                .from("au_pair_profiles")
+                .select("firstName, lastName, profilePhotoUrl")
+                .eq("userId", conversation.partnerId)
+                .single();
+            const { data: hostProfile } = await supabase_1.supabase
+                .from("host_family_profiles")
+                .select("familyName, contactPersonName, profilePhotoUrl")
+                .eq("userId", conversation.partnerId)
+                .single();
+            const profile = auPairProfile || hostProfile;
+            const partnerName = auPairProfile
+                ? `${auPairProfile.firstName} ${auPairProfile.lastName}`
+                : hostProfile?.familyName || partnerUser.email;
+            return {
+                ...conversation,
+                partnerName,
+                partnerEmail: partnerUser.email,
+                partnerPhoto: profile?.profilePhotoUrl || null,
+                messages: conversation.messages.slice(0, 1), // Only include last message for conversation list
+            };
+        }));
+        return res.json(conversations);
     }
     catch (error) {
-        console.error('Get conversations error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("❌ Get conversations error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 });
-// Get messages between current user and another user
-router.get('/:userId', async (req, res) => {
+// Get messages with a specific user
+router.get("/with/:userId", auth_1.authenticate, async (req, res) => {
     try {
         const currentUserId = req.user.id;
         const { userId: otherUserId } = req.params;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
         const offset = (page - 1) * limit;
-        // Verify that users have an approved match
-        const match = await index_1.prisma.match.findFirst({
-            where: {
-                OR: [
-                    { hostId: currentUserId, auPairId: otherUserId, status: 'APPROVED' },
-                    { hostId: otherUserId, auPairId: currentUserId, status: 'APPROVED' }
-                ]
-            }
-        });
-        if (!match) {
-            return res.status(403).json({ message: 'You can only message users you have an approved match with' });
+        // Get messages between current user and other user
+        const { data: messages, error } = await supabase_1.supabase
+            .from("messages")
+            .select("id, senderId, receiverId, content, isRead, createdAt")
+            .or(`and(senderId.eq.${currentUserId},receiverId.eq.${otherUserId}),and(senderId.eq.${otherUserId},receiverId.eq.${currentUserId})`)
+            .order("createdAt", { ascending: false })
+            .range(offset, offset + limit - 1);
+        if (error) {
+            console.error("❌ Error fetching messages:", error);
+            return res.status(500).json({ message: "Error fetching messages" });
         }
-        const messages = await index_1.prisma.message.findMany({
-            where: {
-                OR: [
-                    { senderId: currentUserId, receiverId: otherUserId },
-                    { senderId: otherUserId, receiverId: currentUserId }
-                ]
-            },
-            include: {
-                sender: {
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        auPairProfile: {
-                            select: { firstName: true, lastName: true, profilePhotoUrl: true }
-                        },
-                        hostFamilyProfile: {
-                            select: { familyName: true, contactPersonName: true, profilePhotoUrl: true }
-                        }
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' },
-            take: limit,
-            skip: offset
-        });
         // Mark messages as read (messages sent to current user)
-        await index_1.prisma.message.updateMany({
-            where: {
-                senderId: otherUserId,
-                receiverId: currentUserId,
-                isRead: false
-            },
-            data: { isRead: true }
+        const unreadMessageIds = messages
+            .filter((msg) => msg.receiverId === currentUserId && !msg.isRead)
+            .map((msg) => msg.id);
+        if (unreadMessageIds.length > 0) {
+            await supabase_1.supabase
+                .from("messages")
+                .update({ isRead: true })
+                .in("id", unreadMessageIds);
+        }
+        return res.json({
+            messages: messages.reverse(), // Return in ascending order for chat display
+            page,
+            limit,
         });
-        res.json({ messages: messages.reverse() }); // Reverse to show oldest first
     }
     catch (error) {
-        console.error('Get conversation messages error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("❌ Get messages error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 // Send a message
-router.post('/send', async (req, res) => {
+router.post("/", auth_1.authenticate, async (req, res) => {
     try {
         const senderId = req.user.id;
         const { receiverId, content } = req.body;
-        if (!receiverId || !content?.trim()) {
-            return res.status(400).json({ message: 'Receiver ID and content are required' });
+        if (!receiverId || !content) {
+            return res
+                .status(400)
+                .json({ message: "Receiver ID and content are required" });
         }
-        // Verify receiver exists
-        const receiver = await index_1.prisma.user.findUnique({
-            where: { id: receiverId },
-            select: { id: true, isActive: true }
-        });
-        if (!receiver || !receiver.isActive) {
-            return res.status(404).json({ message: 'Receiver not found or inactive' });
+        // Verify receiver exists and is active
+        const { data: receiver, error: receiverError } = await supabase_1.supabase
+            .from("users")
+            .select("id, isActive")
+            .eq("id", receiverId)
+            .single();
+        if (receiverError || !receiver || !receiver.isActive) {
+            return res
+                .status(400)
+                .json({ message: "Receiver not found or inactive" });
         }
-        // Verify that users have an approved match
-        const match = await index_1.prisma.match.findFirst({
-            where: {
-                OR: [
-                    { hostId: senderId, auPairId: receiverId, status: 'APPROVED' },
-                    { hostId: receiverId, auPairId: senderId, status: 'APPROVED' }
-                ]
-            }
-        });
-        if (!match) {
-            return res.status(403).json({ message: 'You can only message users you have an approved match with' });
+        // Create the message
+        const messageId = (0, uuid_1.v4)();
+        const { data: newMessage, error: insertError } = await supabase_1.supabase
+            .from("messages")
+            .insert({
+            id: messageId,
+            senderId,
+            receiverId,
+            content: content.trim(),
+            isRead: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        })
+            .select()
+            .single();
+        if (insertError) {
+            console.error("❌ Error creating message:", insertError);
+            return res.status(500).json({ message: "Error sending message" });
         }
-        const message = await index_1.prisma.message.create({
-            data: {
-                senderId,
-                receiverId,
-                content: content.trim()
-            },
-            include: {
-                sender: {
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        auPairProfile: {
-                            select: { firstName: true, lastName: true, profilePhotoUrl: true }
-                        },
-                        hostFamilyProfile: {
-                            select: { familyName: true, contactPersonName: true, profilePhotoUrl: true }
-                        }
-                    }
-                }
-            }
+        return res.status(201).json({
+            message: "Message sent successfully",
+            data: newMessage,
         });
-        res.status(201).json({ message: 'Message sent successfully', data: message });
     }
     catch (error) {
-        console.error('Send message error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("❌ Send message error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 // Mark messages as read
-router.put('/mark-read', async (req, res) => {
+router.put("/read", auth_1.authenticate, async (req, res) => {
     try {
         const receiverId = req.user.id;
         const { senderId } = req.body;
         if (!senderId) {
-            return res.status(400).json({ message: 'Sender ID is required' });
+            return res.status(400).json({ message: "Sender ID is required" });
         }
-        await index_1.prisma.message.updateMany({
-            where: {
-                senderId,
-                receiverId,
-                isRead: false
-            },
-            data: { isRead: true }
-        });
-        res.json({ message: 'Messages marked as read' });
+        // Mark all messages from sender to current user as read
+        const { error } = await supabase_1.supabase
+            .from("messages")
+            .update({ isRead: true })
+            .eq("senderId", senderId)
+            .eq("receiverId", receiverId)
+            .eq("isRead", false);
+        if (error) {
+            console.error("❌ Error marking messages as read:", error);
+            return res
+                .status(500)
+                .json({ message: "Error marking messages as read" });
+        }
+        return res.json({ message: "Messages marked as read" });
     }
     catch (error) {
-        console.error('Mark messages read error:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-// Get unread message count
-router.get('/unread-count', async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const unreadCount = await index_1.prisma.message.count({
-            where: {
-                receiverId: userId,
-                isRead: false
-            }
-        });
-        res.json({ unreadCount });
-    }
-    catch (error) {
-        console.error('Get unread count error:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-// Delete a message (only sender can delete)
-router.delete('/:messageId', async (req, res) => {
-    try {
-        const { messageId } = req.params;
-        const userId = req.user.id;
-        const message = await index_1.prisma.message.findUnique({
-            where: { id: messageId }
-        });
-        if (!message) {
-            return res.status(404).json({ message: 'Message not found' });
-        }
-        if (message.senderId !== userId) {
-            return res.status(403).json({ message: 'You can only delete messages you sent' });
-        }
-        await index_1.prisma.message.delete({
-            where: { id: messageId }
-        });
-        res.json({ message: 'Message deleted successfully' });
-    }
-    catch (error) {
-        console.error('Delete message error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("❌ Mark messages read error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 exports.default = router;

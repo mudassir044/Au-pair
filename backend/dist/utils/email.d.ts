@@ -1,3 +1,4 @@
+export declare function verifyEmailConnection(): Promise<boolean>;
 export declare const sendVerificationEmail: (email: string, token: string) => Promise<{
     messageId: string;
     previewUrl: string | false;

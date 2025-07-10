@@ -4,202 +4,212 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const index_1 = require("../index");
+const supabase_1 = require("../utils/supabase");
+const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
-// Create or update Au Pair profile
-router.post('/au-pair', async (req, res) => {
+// Get profile completion status
+router.get("/completion", auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
-        const { firstName, lastName, dateOfBirth, bio, languages, skills, experience, education, videoUrl, preferredCountries, hourlyRate, currency, availableFrom, availableTo, profilePhotoUrl } = req.body;
-        // Validation
-        if (!firstName || !lastName || !dateOfBirth) {
-            return res.status(400).json({ message: 'First name, last name, and date of birth are required' });
+        // Get user data
+        const { data: user, error: userError } = await supabase_1.supabase
+            .from("users")
+            .select("role, profilecompleted")
+            .eq("id", userId)
+            .single();
+        if (userError) {
+            console.error(`❌ Error fetching user ${userId}:`, userError);
+            return res.status(500).json({ message: "Error fetching user data" });
         }
-        // Check if user is an au pair
-        const user = await index_1.prisma.user.findUnique({
-            where: { id: userId },
-            select: { role: true }
-        });
-        if (!user || user.role !== 'AU_PAIR') {
-            return res.status(403).json({ message: 'Only au pairs can create au pair profiles' });
-        }
-        // Create or update profile
-        const profile = await index_1.prisma.auPairProfile.upsert({
-            where: { userId },
-            create: {
-                userId,
-                firstName,
-                lastName,
-                dateOfBirth: new Date(dateOfBirth),
-                bio,
-                languages: JSON.stringify(languages || []),
-                skills: JSON.stringify(skills || []),
-                experience,
-                education,
-                videoUrl,
-                preferredCountries: JSON.stringify(preferredCountries || []),
-                hourlyRate: hourlyRate ? parseFloat(hourlyRate) : null,
-                currency: currency || 'USD',
-                availableFrom: availableFrom ? new Date(availableFrom) : null,
-                availableTo: availableTo ? new Date(availableTo) : null,
-                profilePhotoUrl
-            },
-            update: {
-                firstName,
-                lastName,
-                dateOfBirth: new Date(dateOfBirth),
-                bio,
-                languages: JSON.stringify(languages || []),
-                skills: JSON.stringify(skills || []),
-                experience,
-                education,
-                videoUrl,
-                preferredCountries: JSON.stringify(preferredCountries || []),
-                hourlyRate: hourlyRate ? parseFloat(hourlyRate) : null,
-                currency: currency || 'USD',
-                availableFrom: availableFrom ? new Date(availableFrom) : null,
-                availableTo: availableTo ? new Date(availableTo) : null,
-                profilePhotoUrl
-            }
-        });
-        res.json({ message: 'Au pair profile saved successfully', profile });
-    }
-    catch (error) {
-        console.error('Au pair profile error:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-// Create or update Host Family profile
-router.post('/host-family', async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { familyName, contactPersonName, bio, location, country, numberOfChildren, childrenAges, requirements, preferredLanguages, maxBudget, currency, profilePhotoUrl } = req.body;
-        // Validation
-        if (!familyName || !contactPersonName || !location || !country || !numberOfChildren) {
-            return res.status(400).json({
-                message: 'Family name, contact person, location, country, and number of children are required'
+        // If profile is already marked as complete, return that
+        if (user.profilecompleted) {
+            return res.status(200).json({
+                completed: true,
+                percentage: 100,
+                missingFields: [],
             });
         }
-        // Check if user is a host family
-        const user = await index_1.prisma.user.findUnique({
-            where: { id: userId },
-            select: { role: true }
-        });
-        if (!user || user.role !== 'HOST_FAMILY') {
-            return res.status(403).json({ message: 'Only host families can create host family profiles' });
+        // Check profile completion based on role
+        let profileData, profileError, requiredFields, missingFields = [];
+        let completedFields = 0;
+        if (user.role === "AU_PAIR") {
+            // Get au pair profile
+            const { data, error } = await supabase_1.supabase
+                .from("au_pair_profiles")
+                .select("*")
+                .eq("userId", userId)
+                .single();
+            profileData = data;
+            profileError = error;
+            // Define required fields for au pair
+            requiredFields = [
+                "firstName",
+                "lastName",
+                "dateOfBirth",
+                "bio",
+                "languages",
+                "skills",
+                "experience",
+                "education",
+                "preferredCountries",
+                "hourlyRate",
+                "availableFrom",
+                "availableTo",
+                "profilePhotoUrl",
+            ];
         }
-        // Create or update profile
-        const profile = await index_1.prisma.hostFamilyProfile.upsert({
-            where: { userId },
-            create: {
-                userId,
-                familyName,
-                contactPersonName,
-                bio,
-                location,
-                country,
-                numberOfChildren: parseInt(numberOfChildren),
-                childrenAges: JSON.stringify(childrenAges || []),
-                requirements,
-                preferredLanguages: JSON.stringify(preferredLanguages || []),
-                maxBudget: maxBudget ? parseFloat(maxBudget) : null,
-                currency: currency || 'USD',
-                profilePhotoUrl
-            },
-            update: {
-                familyName,
-                contactPersonName,
-                bio,
-                location,
-                country,
-                numberOfChildren: parseInt(numberOfChildren),
-                childrenAges: JSON.stringify(childrenAges || []),
-                requirements,
-                preferredLanguages: JSON.stringify(preferredLanguages || []),
-                maxBudget: maxBudget ? parseFloat(maxBudget) : null,
-                currency: currency || 'USD',
-                profilePhotoUrl
+        else if (user.role === "HOST_FAMILY") {
+            // Get host family profile
+            const { data, error } = await supabase_1.supabase
+                .from("host_family_profiles")
+                .select("*")
+                .eq("userId", userId)
+                .single();
+            profileData = data;
+            profileError = error;
+            // Define required fields for host family
+            requiredFields = [
+                "familyName",
+                "contactPersonName",
+                "bio",
+                "location",
+                "country",
+                "numberOfChildren",
+                "childrenAges",
+                "requirements",
+                "preferredLanguages",
+                "maxBudget",
+                "profilePhotoUrl",
+            ];
+        }
+        else {
+            return res.status(400).json({ message: "Invalid user role" });
+        }
+        if (profileError || !profileData) {
+            console.error(`❌ Error fetching profile for user ${userId}:`, profileError);
+            return res.status(500).json({ message: "Error fetching profile data" });
+        }
+        // Check which fields are completed
+        for (const field of requiredFields) {
+            if (profileData[field] &&
+                (typeof profileData[field] !== "string" ||
+                    profileData[field].trim() !== "")) {
+                completedFields++;
             }
+            else {
+                missingFields.push(field);
+            }
+        }
+        // Calculate completion percentage
+        const percentage = Math.round((completedFields / requiredFields.length) * 100);
+        const completed = percentage === 100;
+        // If profile is now complete, update the user record
+        if (completed && !user.profilecompleted) {
+            const { error: updateError } = await supabase_1.supabase
+                .from("users")
+                .update({
+                profilecompleted: true,
+                updatedAt: new Date().toISOString(),
+            })
+                .eq("id", userId);
+            if (updateError) {
+                console.error(`❌ Error updating profile completion status for user ${userId}:`, updateError);
+            }
+        }
+        return res.status(200).json({
+            completed,
+            percentage,
+            missingFields,
         });
-        res.json({ message: 'Host family profile saved successfully', profile });
     }
     catch (error) {
-        console.error('Host family profile error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("❌ Profile completion error:", error);
+        return res
+            .status(500)
+            .json({ message: "An error occurred while checking profile completion" });
     }
 });
-// Get current user's profile
-router.get('/me', async (req, res) => {
+// Get user profile
+router.get("/me", auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
         const userRole = req.user.role;
-        let profile = null;
-        if (userRole === 'AU_PAIR') {
-            profile = await index_1.prisma.auPairProfile.findUnique({
-                where: { userId }
-            });
+        if (userRole === "AU_PAIR") {
+            const { data: profile, error } = await supabase_1.supabase
+                .from("au_pair_profiles")
+                .select("*")
+                .eq("userId", userId)
+                .single();
+            if (error) {
+                console.error("❌ Error fetching au pair profile:", error);
+                return res.status(500).json({ message: "Error fetching profile" });
+            }
+            return res.json({ profile, role: userRole });
         }
-        else if (userRole === 'HOST_FAMILY') {
-            profile = await index_1.prisma.hostFamilyProfile.findUnique({
-                where: { userId }
-            });
+        else if (userRole === "HOST_FAMILY") {
+            const { data: profile, error } = await supabase_1.supabase
+                .from("host_family_profiles")
+                .select("*")
+                .eq("userId", userId)
+                .single();
+            if (error) {
+                console.error("❌ Error fetching host family profile:", error);
+                return res.status(500).json({ message: "Error fetching profile" });
+            }
+            return res.json({ profile, role: userRole });
         }
-        res.json({ profile });
+        return res.status(400).json({ message: "Invalid user role" });
     }
     catch (error) {
-        console.error('Get profile error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("❌ Get profile error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 });
-// Get profile by user ID
-router.get('/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const user = await index_1.prisma.user.findUnique({
-            where: { id: userId },
-            select: { role: true, isActive: true }
-        });
-        if (!user || !user.isActive) {
-            return res.status(404).json({ message: 'User not found or inactive' });
-        }
-        let profile = null;
-        if (user.role === 'AU_PAIR') {
-            profile = await index_1.prisma.auPairProfile.findUnique({
-                where: { userId }
-            });
-        }
-        else if (user.role === 'HOST_FAMILY') {
-            profile = await index_1.prisma.hostFamilyProfile.findUnique({
-                where: { userId }
-            });
-        }
-        res.json({ profile, userRole: user.role });
-    }
-    catch (error) {
-        console.error('Get user profile error:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-// Delete current user's profile
-router.delete('/me', async (req, res) => {
+// Update user profile
+router.put("/me", auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
         const userRole = req.user.role;
-        if (userRole === 'AU_PAIR') {
-            await index_1.prisma.auPairProfile.deleteMany({
-                where: { userId }
+        const profileData = req.body;
+        // Add updated timestamp
+        profileData.updatedAt = new Date().toISOString();
+        if (userRole === "AU_PAIR") {
+            const { data, error } = await supabase_1.supabase
+                .from("au_pair_profiles")
+                .update(profileData)
+                .eq("userId", userId)
+                .select()
+                .single();
+            if (error) {
+                console.error("❌ Error updating au pair profile:", error);
+                return res.status(500).json({ message: "Error updating profile" });
+            }
+            return res.json({
+                message: "Profile updated successfully",
+                profile: data,
             });
         }
-        else if (userRole === 'HOST_FAMILY') {
-            await index_1.prisma.hostFamilyProfile.deleteMany({
-                where: { userId }
+        else if (userRole === "HOST_FAMILY") {
+            const { data, error } = await supabase_1.supabase
+                .from("host_family_profiles")
+                .update(profileData)
+                .eq("userId", userId)
+                .select()
+                .single();
+            if (error) {
+                console.error("❌ Error updating host family profile:", error);
+                return res.status(500).json({ message: "Error updating profile" });
+            }
+            return res.json({
+                message: "Profile updated successfully",
+                profile: data,
             });
         }
-        res.json({ message: 'Profile deleted successfully' });
+        return res.status(400).json({ message: "Invalid user role" });
     }
     catch (error) {
-        console.error('Delete profile error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("❌ Update profile error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 exports.default = router;

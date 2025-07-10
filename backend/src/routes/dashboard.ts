@@ -1,5 +1,5 @@
 import express from "express";
-import { prisma } from "../index";
+import { supabase } from "../utils/supabase";
 import { authenticate, AuthRequest } from "../middleware/auth";
 
 const router = express.Router();
@@ -8,122 +8,164 @@ const router = express.Router();
 router.get("/stats", authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
+    const userRole = req.user!.role;
 
-    // Get user's matches count
-    const totalMatches = await prisma.match.count({
-      where: {
-        OR: [{ hostId: userId }, { auPairId: userId }],
-      },
-    });
+    // Get user data
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("role, profilecompleted")
+      .eq("id", userId)
+      .single();
 
-    const pendingMatches = await prisma.match.count({
-      where: {
-        OR: [{ hostId: userId }, { auPairId: userId }],
-        status: "PENDING",
-      },
-    });
-
-    const approvedMatches = await prisma.match.count({
-      where: {
-        OR: [{ hostId: userId }, { auPairId: userId }],
-        status: "APPROVED",
-      },
-    });
-
-    // Get user's bookings count
-    const totalBookings = await prisma.booking.count({
-      where: {
-        OR: [{ hostId: userId }, { auPairId: userId }],
-      },
-    });
-
-    const upcomingBookings = await prisma.booking.count({
-      where: {
-        OR: [{ hostId: userId }, { auPairId: userId }],
-        scheduledDate: {
-          gte: new Date(),
-        },
-        status: {
-          in: ["PENDING", "APPROVED"],
-        },
-      },
-    });
-
-    // Get unread messages count
-    const unreadMessages = await prisma.message.count({
-      where: {
-        receiverId: userId,
-        isRead: false,
-      },
-    });
-
-    // Calculate profile completion percentage
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        auPairProfile: true,
-        hostFamilyProfile: true,
-      },
-    });
-
-    let profileCompletion = 50; // Base completion for having an account
-
-    if (user?.auPairProfile) {
-      const profile = user.auPairProfile;
-      let completedFields = 0;
-      const totalFields = 10;
-
-      if (profile.firstName) completedFields++;
-      if (profile.lastName) completedFields++;
-      if (profile.bio) completedFields++;
-      //if (profile.location) completedFields++;
-      if (profile.dateOfBirth) completedFields++;
-      if (profile.profilePhotoUrl) completedFields++;
-      if (profile.languages && profile.languages.length > 0) completedFields++;
-      if (profile.skills && profile.skills.length > 0) completedFields++;
-      if (profile.experience) completedFields++;
-      if (profile.education) completedFields++;
-
-      profileCompletion = Math.round((completedFields / totalFields) * 100);
-    } else if (user?.hostFamilyProfile) {
-      const profile = user.hostFamilyProfile;
-      let completedFields = 0;
-      const totalFields = 8;
-
-      if (profile.familyName) completedFields++;
-      if (profile.contactPersonName) completedFields++;
-      if (profile.bio) completedFields++;
-      if (profile.location) completedFields++;
-      if (profile.profilePhotoUrl) completedFields++;
-      if (profile.childrenAges && profile.childrenAges.length > 0)
-        completedFields++;
-      if (profile.requirements) completedFields++;
-      if (profile.preferredLanguages && profile.preferredLanguages.length > 0)
-        completedFields++;
-
-      profileCompletion = Math.round((completedFields / totalFields) * 100);
+    if (userError) {
+      console.error(`❌ Error fetching user ${userId}:`, userError);
+      return res.status(500).json({ message: "Error fetching user data" });
     }
 
+    // Initialize stats object
     const stats = {
-      total_matches: totalMatches,
-      pending_matches: pendingMatches,
-      approved_matches: approvedMatches,
-      total_bookings: totalBookings,
-      upcoming_bookings: upcomingBookings,
-      unread_messages: unreadMessages,
-      profile_completion: profileCompletion,
+      profileCompletion: user.profilecompleted ? 100 : 0,
+      pendingMatches: 0,
+      approvedMatches: 0,
+      upcomingBookings: 0,
+      totalMessages: 0,
+      unreadMessages: 0,
     };
 
-    res.json({
-      status: "success",
-      data: stats,
-    });
+    // If profile is not complete, get completion percentage
+    if (!user.profilecompleted) {
+      let profileData: any, profileError: any, requiredFields: string[];
+      let completedFields = 0;
+
+      if (userRole === "AU_PAIR") {
+        const { data, error } = await supabase
+          .from("au_pair_profiles")
+          .select("*")
+          .eq("userId", userId)
+          .single();
+        profileData = data;
+        profileError = error;
+        requiredFields = [
+          "firstName",
+          "lastName",
+          "dateOfBirth",
+          "bio",
+          "languages",
+          "skills",
+          "experience",
+          "education",
+          "preferredCountries",
+          "hourlyRate",
+          "availableFrom",
+          "availableTo",
+          "profilePhotoUrl",
+        ];
+      } else if (userRole === "HOST_FAMILY") {
+        const { data, error } = await supabase
+          .from("host_family_profiles")
+          .select("*")
+          .eq("userId", userId)
+          .single();
+        profileData = data;
+        profileError = error;
+        requiredFields = [
+          "familyName",
+          "contactPersonName",
+          "bio",
+          "location",
+          "country",
+          "numberOfChildren",
+          "childrenAges",
+          "requirements",
+          "preferredLanguages",
+          "maxBudget",
+          "profilePhotoUrl",
+        ];
+      }
+
+      if (!profileError && profileData) {
+        for (const field of requiredFields!) {
+          if (
+            profileData[field] &&
+            (typeof profileData[field] !== "string" ||
+              profileData[field].trim() !== "")
+          ) {
+            completedFields++;
+          }
+        }
+        stats.profileCompletion = Math.round(
+          (completedFields / requiredFields!.length) * 100,
+        );
+      }
+    }
+
+    // Get match statistics based on role
+    const matchField = userRole === "AU_PAIR" ? "auPairId" : "hostId";
+
+    // Pending matches
+    const { count: pendingCount, error: pendingError } = await supabase
+      .from("matches")
+      .select("*", { count: "exact", head: true })
+      .eq(matchField, userId)
+      .eq("status", "PENDING");
+
+    if (!pendingError) {
+      stats.pendingMatches = pendingCount || 0;
+    }
+
+    // Approved matches
+    const { count: approvedCount, error: approvedError } = await supabase
+      .from("matches")
+      .select("*", { count: "exact", head: true })
+      .eq(matchField, userId)
+      .eq("status", "APPROVED");
+
+    if (!approvedError) {
+      stats.approvedMatches = approvedCount || 0;
+    }
+
+    // Upcoming bookings
+    const now = new Date().toISOString();
+    const { count: bookingsCount, error: bookingsError } = await supabase
+      .from("bookings")
+      .select("*", { count: "exact", head: true })
+      .eq(matchField, userId)
+      .eq("status", "APPROVED")
+      .gt("startDate", now);
+
+    if (!bookingsError) {
+      stats.upcomingBookings = bookingsCount || 0;
+    }
+
+    // Total messages
+    const { count: totalMsgCount, error: totalMsgError } = await supabase
+      .from("messages")
+      .select("*", { count: "exact", head: true })
+      .or(`senderId.eq.${userId},receiverId.eq.${userId}`);
+
+    if (!totalMsgError) {
+      stats.totalMessages = totalMsgCount || 0;
+    }
+
+    // Unread messages
+    const { count: unreadCount, error: unreadError } = await supabase
+      .from("messages")
+      .select("*", { count: "exact", head: true })
+      .eq("receiverId", userId)
+      .eq("isRead", false);
+
+    if (!unreadError) {
+      stats.unreadMessages = unreadCount || 0;
+    }
+
+    return res.status(200).json(stats);
   } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
-    res.status(500).json({
-      status: "error",
-      message: "Failed to fetch dashboard statistics",
-    });
+    console.error("❌ Dashboard stats error:", error);
+    return res
+      .status(500)
+      .json({
+        message: "An error occurred while fetching dashboard statistics",
+      });
   }
 });
 

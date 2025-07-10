@@ -6,6 +6,8 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
+import { checkDatabaseConnection } from "./utils/supabase";
+import { verifyEmailConnection } from "./utils/email";
 
 // Load environment variables
 dotenv.config();
@@ -22,6 +24,8 @@ import calendarRoutes from "./routes/calendar";
 import adminRoutes from "./routes/admin";
 import dashboardRoutes from "./routes/dashboard";
 import plansRoutes from "./routes/plans";
+import healthRoutes from "./routes/health";
+import demoRoutes from "./routes/demo";
 
 // Import socket handlers
 import { setupMessageHandlers } from "./sockets/messageHandlers";
@@ -100,6 +104,12 @@ app.get("/health", (req, res) => {
   });
 });
 
+// Health check (no authentication required)
+app.use("/health", healthRoutes);
+
+// Demo routes (no authentication required)
+app.use("/api/demo", demoRoutes);
+
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -148,14 +158,45 @@ app.use((req, res) => {
   });
 });
 
-// Start server
-server.listen(parseInt(PORT as string, 10), () => {
-  console.log(`🚀 Au-pair backend server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🔗 Health check: http://0.0.0.0:${PORT}/health`);
-  console.log(
-    `🌐 CORS allowed origins: ${process.env.NODE_ENV === "production" ? process.env.FRONTEND_URL : "localhost:3000"}`,
-  );
+// Application startup function
+async function startServer() {
+  console.log("🔧 Starting application services...");
+
+  // Check critical connections
+  const dbConnected = await checkDatabaseConnection();
+  const emailConnected = await verifyEmailConnection();
+
+  if (!dbConnected) {
+    console.error(
+      "⚠️ WARNING: Supabase database connection failed. Application may not function correctly.",
+    );
+  }
+
+  if (!emailConnected) {
+    console.warn(
+      "⚠️ WARNING: Email service connection failed. Verification emails will not be sent.",
+    );
+  }
+
+  // Start server even if some services are down
+  const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+  server.listen(parseInt(PORT as string, 10), host, () => {
+    console.log(`🚀 Au-pair backend server running on ${host}:${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+    console.log(`🔗 Health check: http://${host}:${PORT}/health`);
+    console.log(
+      `🌐 CORS allowed origins: ${process.env.NODE_ENV === "production" ? process.env.FRONTEND_URL : "localhost:3000"}`,
+    );
+    console.log(
+      `✅ Services status: Database: ${dbConnected ? "Connected" : "Failed"}, Email: ${emailConnected ? "Connected" : "Failed"}`,
+    );
+  });
+}
+
+// Start the server
+startServer().catch((error) => {
+  console.error("❌ Failed to start server:", error);
+  process.exit(1);
 });
 
 // Graceful shutdown
