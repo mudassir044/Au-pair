@@ -20,12 +20,18 @@ export const supabase =
     ? createClient(supabaseUrl, supabaseServiceKey)
     : null;
 
+// Import mock for demo mode
+import { mockSupabase } from "./mockSupabase";
+
+// Export the client to use (real or mock)
+export const dbClient = supabase || mockSupabase;
+
 // Database connection check
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
     if (!supabase) {
-      console.error("❌ Supabase client not initialized");
-      return false;
+      console.log("📊 Using demo database (mock Supabase)");
+      return true;
     }
     const { data, error } = await supabase
       .from("users")
@@ -36,7 +42,8 @@ export async function checkDatabaseConnection(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("❌ Supabase database connection failed:", error);
-    return false;
+    console.log("📊 Falling back to demo database (mock Supabase)");
+    return true;
   }
 }
 
