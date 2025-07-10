@@ -81,19 +81,24 @@ router.get("/search", auth_1.authenticate, async (req, res) => {
         // Filter out users we already have matches with
         const availableUsers = users?.filter((user) => !existingMatchIds.has(user.id)) || [];
         // Format response
-        const formattedUsers = availableUsers.map((user) => ({
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            createdAt: user.createdAt,
-            profile: {
-                ...user.profile,
-                name: targetRole === "AU_PAIR"
-                    ? `${user.profile.firstName} ${user.profile.lastName}`
-                    : user.profile.familyName,
-                displayPhoto: user.profile.profilePhotoUrl,
-            },
-        }));
+        const formattedUsers = availableUsers.map((user) => {
+            const profile = Array.isArray(user.profile)
+                ? user.profile[0]
+                : user.profile;
+            return {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                createdAt: user.createdAt,
+                profile: {
+                    ...profile,
+                    name: targetRole === "AU_PAIR"
+                        ? `${profile?.firstName || ""} ${profile?.lastName || ""}`.trim()
+                        : profile?.familyName || "Unknown",
+                    displayPhoto: profile?.profilePhotoUrl || null,
+                },
+            };
+        });
         return res.json({
             users: formattedUsers,
             page,
@@ -214,7 +219,9 @@ router.get("/recommendations/for-me", auth_1.authenticate, async (req, res) => {
             ?.filter((user) => !existingMatchIds.has(user.id))
             .map((user) => {
             let score = 0;
-            const profile = user.profile;
+            const profile = Array.isArray(user.profile)
+                ? user.profile[0]
+                : user.profile;
             // Score based on location/country match
             if (userRole === "AU_PAIR" &&
                 currentProfile.preferredCountries &&
@@ -264,8 +271,8 @@ router.get("/recommendations/for-me", auth_1.authenticate, async (req, res) => {
                 profile: {
                     ...profile,
                     name: targetRole === "AU_PAIR"
-                        ? `${profile.firstName} ${profile.lastName}`
-                        : profile.familyName,
+                        ? `${profile?.firstName || ""} ${profile?.lastName || ""}`.trim()
+                        : profile?.familyName || "Unknown",
                 },
             };
         })
