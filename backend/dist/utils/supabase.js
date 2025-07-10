@@ -9,11 +9,21 @@ const supabase_js_1 = require("@supabase/supabase-js");
 const multer_1 = __importDefault(require("multer"));
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseUrl || !supabaseServiceKey) {
+    console.warn("⚠️  WARNING: Missing Supabase configuration. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env file");
+    console.warn("⚠️  The application will not function properly without these environment variables");
+}
 // Use service role key for backend operations to bypass RLS
-exports.supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseServiceKey);
+exports.supabase = supabaseUrl && supabaseServiceKey
+    ? (0, supabase_js_1.createClient)(supabaseUrl, supabaseServiceKey)
+    : null;
 // Database connection check
 async function checkDatabaseConnection() {
     try {
+        if (!exports.supabase) {
+            console.error("❌ Supabase client not initialized");
+            return false;
+        }
         const { data, error } = await exports.supabase
             .from("users")
             .select("count")
