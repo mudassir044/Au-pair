@@ -1,16 +1,33 @@
 import nodemailer from "nodemailer";
 
-// Create reusable transporter for development (will be replaced with real SMTP in production)
-const transporter = nodemailer.createTransport({
-  host: "smtp.ethereal.email",
-  port: 587,
-  secure: false,
+// Create reusable transporter with proper error handling
+const transporter = nodemailer.createTransporter({
+  host: process.env.EMAIL_HOST || "smtp.ethereal.email",
+  port: parseInt(process.env.EMAIL_PORT || "587"),
+  secure: process.env.EMAIL_SECURE === "true",
   auth: {
-    user: "ethereal.user@ethereal.email",
-    pass: "ethereal.pass",
+    user: process.env.EMAIL_USER || "ethereal.user@ethereal.email",
+    pass: process.env.EMAIL_PASSWORD || "ethereal.pass",
+  },
+  // Add this to handle connection issues better
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
+// Verify connection on startup
+export async function verifyEmailConnection(): Promise<boolean> {
+  try {
+    await transporter.verify();
+    console.log("✅ Email service connection verified");
+    return true;
+  } catch (error) {
+    console.error("❌ Email service connection failed:", error);
+    return false;
+  }
+}
+
+// Send verification email with proper error handling
 export const sendVerificationEmail = async (email: string, token: string) => {
   try {
     const frontendUrl =
@@ -44,7 +61,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     };
   } catch (error) {
     console.error("❌ Failed to send verification email:", error);
-    throw error;
+    throw error; // Rethrow for handling by caller
   }
 };
 
@@ -80,6 +97,6 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     };
   } catch (error) {
     console.error("❌ Failed to send password reset email:", error);
-    throw error;
+    throw error; // Rethrow for handling by caller
   }
 };
