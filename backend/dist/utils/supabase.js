@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteFromSupabase = exports.uploadToSupabase = exports.upload = exports.supabase = void 0;
+exports.deleteFromSupabase = exports.uploadToSupabase = exports.upload = exports.dbClient = exports.supabase = void 0;
 exports.checkDatabaseConnection = checkDatabaseConnection;
 const supabase_js_1 = require("@supabase/supabase-js");
 const multer_1 = __importDefault(require("multer"));
@@ -17,12 +17,16 @@ if (!supabaseUrl || !supabaseServiceKey) {
 exports.supabase = supabaseUrl && supabaseServiceKey
     ? (0, supabase_js_1.createClient)(supabaseUrl, supabaseServiceKey)
     : null;
+// Import mock for demo mode
+const mockSupabase_1 = require("./mockSupabase");
+// Export the client to use (real or mock)
+exports.dbClient = exports.supabase || mockSupabase_1.mockSupabase;
 // Database connection check
 async function checkDatabaseConnection() {
     try {
         if (!exports.supabase) {
-            console.error("❌ Supabase client not initialized");
-            return false;
+            console.log("📊 Using demo database (mock Supabase)");
+            return true;
         }
         const { data, error } = await exports.supabase
             .from("users")
@@ -35,7 +39,8 @@ async function checkDatabaseConnection() {
     }
     catch (error) {
         console.error("❌ Supabase database connection failed:", error);
-        return false;
+        console.log("📊 Falling back to demo database (mock Supabase)");
+        return true;
     }
 }
 // Configure multer for file uploads

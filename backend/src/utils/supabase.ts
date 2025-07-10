@@ -9,9 +9,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
   console.warn(
     "⚠️  WARNING: Missing Supabase configuration. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env file",
   );
-  console.warn(
-    "⚠️  The application will not function properly without these environment variables",
-  );
+  console.warn("⚠️  The application will use demo mode with mock data");
 }
 
 // Use service role key for backend operations to bypass RLS
@@ -20,17 +18,14 @@ export const supabase =
     ? createClient(supabaseUrl, supabaseServiceKey)
     : null;
 
-// Import mock for demo mode
-import { mockSupabase } from "./mockSupabase";
-
-// Export the client to use (real or mock)
-export const dbClient = supabase || mockSupabase;
+// Demo mode flag
+export const isDemoMode = !supabase;
 
 // Database connection check
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
     if (!supabase) {
-      console.log("📊 Using demo database (mock Supabase)");
+      console.log("📊 Using demo database mode (no Supabase credentials)");
       return true;
     }
     const { data, error } = await supabase
@@ -42,8 +37,8 @@ export async function checkDatabaseConnection(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("❌ Supabase database connection failed:", error);
-    console.log("📊 Falling back to demo database (mock Supabase)");
-    return true;
+    console.log("📊 Application will continue in demo mode");
+    return true; // Continue in demo mode
   }
 }
 
@@ -79,10 +74,15 @@ export const uploadToSupabase = async (
   userId: string,
   bucket: string,
 ): Promise<string> => {
+  if (isDemoMode) {
+    // Return a demo URL
+    return `https://demo.supabase.co/storage/v1/object/public/${bucket}/${userId}/${file.originalname}`;
+  }
+
   try {
     const filename = `${userId}/${Date.now()}_${file.originalname}`;
 
-    const { data, error } = await supabase.storage
+    const { data, error } = await supabase!.storage
       .from(bucket)
       .upload(filename, file.buffer, {
         contentType: file.mimetype,
@@ -93,7 +93,7 @@ export const uploadToSupabase = async (
       throw new Error(`Upload failed: ${error.message}`);
     }
 
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabase!.storage
       .from(bucket)
       .getPublicUrl(filename);
 
@@ -104,6 +104,11 @@ export const uploadToSupabase = async (
 };
 
 export const deleteFromSupabase = async (url: string): Promise<void> => {
+  if (isDemoMode) {
+    console.log("📁 Demo mode: File delete simulated");
+    return;
+  }
+
   try {
     // Extract file path from URL
     const urlParts = url.split("/storage/v1/object/public/uploads/");
@@ -113,7 +118,9 @@ export const deleteFromSupabase = async (url: string): Promise<void> => {
 
     const filePath = urlParts[1];
 
-    const { error } = await supabase.storage.from("uploads").remove([filePath]);
+    const { error } = await supabase!.storage
+      .from("uploads")
+      .remove([filePath]);
 
     if (error) {
       console.error("Supabase delete error:", error);

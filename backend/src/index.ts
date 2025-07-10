@@ -25,6 +25,7 @@ import adminRoutes from "./routes/admin";
 import dashboardRoutes from "./routes/dashboard";
 import plansRoutes from "./routes/plans";
 import healthRoutes from "./routes/health";
+import demoRoutes from "./routes/demo";
 
 // Import socket handlers
 import { setupMessageHandlers } from "./sockets/messageHandlers";
@@ -105,6 +106,9 @@ app.get("/health", (req, res) => {
 
 // Health check (no authentication required)
 app.use("/health", healthRoutes);
+
+// Demo routes (no authentication required)
+app.use("/api/demo", demoRoutes);
 
 // API Routes
 app.use("/api/auth", authRoutes);
