@@ -21,8 +21,8 @@ router.get("/conversations", authenticate, async (req: AuthRequest, res) => {
         content,
         isRead,
         createdAt,
-        sender:users!senderId(id, email),
-        receiver:users!receiverId(id, email)
+        senderData:users!senderId(id, email),
+        receiverData:users!receiverId(id, email)
       `,
       )
       .or(`senderId.eq.${userId},receiverId.eq.${userId}`)
@@ -40,7 +40,7 @@ router.get("/conversations", authenticate, async (req: AuthRequest, res) => {
       const partnerId =
         message.senderId === userId ? message.receiverId : message.senderId;
       const partnerData =
-        message.senderId === userId ? message.receiver : message.sender;
+        message.senderId === userId ? message.receiverData : message.senderData;
 
       if (!conversationsMap.has(partnerId)) {
         conversationsMap.set(partnerId, {

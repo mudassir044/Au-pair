@@ -4,66 +4,149 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const index_1 = require("../index");
-const matching_1 = require("../utils/matching");
+const uuid_1 = require("uuid");
+const supabase_1 = require("../utils/supabase");
 const auth_1 = require("../middleware/auth");
-const planLimits_1 = require("../middleware/planLimits");
 const router = express_1.default.Router();
-// Get potential matches for current user
-router.get("/potential", auth_1.authenticate, async (req, res) => {
+// Get recent matches
+router.get("/recent", auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
-        const limit = parseInt(req.query.limit) || 20;
-        const matches = await (0, matching_1.findMatches)(userId, limit);
-        res.json({ matches });
+        const userRole = req.user.role;
+        const limit = parseInt(req.query.limit) || 5;
+        // Determine which field to filter on based on user role
+        const matchField = userRole === "AU_PAIR" ? "auPairId" : "hostId";
+        const otherField = userRole === "AU_PAIR" ? "hostId" : "auPairId";
+        // Get recent matches with user data
+        const { data: matches, error } = await supabase_1.supabase
+            .from("matches")
+            .select(`
+        id, 
+        matchScore, 
+        status, 
+        createdAt,
+        ${otherField}
+      `)
+            .eq(matchField, userId)
+            .order("createdAt", { ascending: false })
+            .limit(limit);
+        if (error) {
+            console.error(`❌ Error fetching matches for user ${userId}:`, error);
+            return res.status(500).json({ message: "Error fetching matches" });
+        }
+        // Enhance matches with profile data
+        const enhancedMatches = await Promise.all(matches.map(async (match) => {
+            const otherUserId = match[otherField];
+            const profileTable = userRole === "AU_PAIR" ? "host_family_profiles" : "au_pair_profiles";
+            const { data: profile, error: profileError } = await supabase_1.supabase
+                .from(profileTable)
+                .select("*")
+                .eq("userId", otherUserId)
+                .single();
+            if (profileError) {
+                console.error(`❌ Error fetching profile for user ${otherUserId}:`, profileError);
+                return match;
+            }
+            // Add profile data to match
+            return {
+                ...match,
+                profile: {
+                    id: profile.id,
+                    name: userRole === "AU_PAIR"
+                        ? profile.familyName
+                        : `${profile.firstName} ${profile.lastName}`,
+                    photo: profile.profilePhotoUrl,
+                    location: userRole === "AU_PAIR" ? profile.location : null,
+                    country: userRole === "AU_PAIR"
+                        ? profile.country
+                        : profile.preferredCountries?.split(",")[0],
+                    hourlyRate: userRole === "AU_PAIR" ? null : profile.hourlyRate,
+                    maxBudget: userRole === "AU_PAIR" ? profile.maxBudget : null,
+                    currency: profile.currency,
+                },
+            };
+        }));
+        return res.status(200).json(enhancedMatches);
     }
     catch (error) {
-        console.error("Get potential matches error:", error);
-        res.status(500).json({ message: "Internal server error" });
+        console.error("❌ Recent matches error:", error);
+        return res
+            .status(500)
+            .json({ message: "An error occurred while fetching recent matches" });
     }
 });
-// Get user's existing matches
-router.get("/my-matches", auth_1.authenticate, async (req, res) => {
+// Get all matches
+router.get("/", auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
+        const userRole = req.user.role;
         const status = req.query.status;
-        const whereClause = {
-            OR: [{ hostId: userId }, { auPairId: userId }],
-        };
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+        const matchField = userRole === "AU_PAIR" ? "auPairId" : "hostId";
+        const otherField = userRole === "AU_PAIR" ? "hostId" : "auPairId";
+        let query = supabase_1.supabase
+            .from("matches")
+            .select(`
+        id, 
+        matchScore, 
+        status, 
+        createdAt,
+        ${otherField}
+      `)
+            .eq(matchField, userId)
+            .order("createdAt", { ascending: false })
+            .range(offset, offset + limit - 1);
         if (status) {
-            whereClause.status = status;
+            query = query.eq("status", status);
         }
-        const matches = await index_1.prisma.match.findMany({
-            where: whereClause,
-            include: {
-                host: {
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        hostFamilyProfile: true,
-                    },
+        const { data: matches, error } = await query;
+        if (error) {
+            console.error(`❌ Error fetching matches for user ${userId}:`, error);
+            return res.status(500).json({ message: "Error fetching matches" });
+        }
+        // Enhance with profile data
+        const enhancedMatches = await Promise.all(matches.map(async (match) => {
+            const otherUserId = match[otherField];
+            const profileTable = userRole === "AU_PAIR" ? "host_family_profiles" : "au_pair_profiles";
+            const { data: profile, error: profileError } = await supabase_1.supabase
+                .from(profileTable)
+                .select("*")
+                .eq("userId", otherUserId)
+                .single();
+            if (profileError) {
+                console.error(`❌ Error fetching profile for user ${otherUserId}:`, profileError);
+                return match;
+            }
+            return {
+                ...match,
+                profile: {
+                    id: profile.id,
+                    name: userRole === "AU_PAIR"
+                        ? profile.familyName
+                        : `${profile.firstName} ${profile.lastName}`,
+                    photo: profile.profilePhotoUrl,
+                    bio: profile.bio,
+                    location: userRole === "AU_PAIR" ? profile.location : null,
+                    country: userRole === "AU_PAIR"
+                        ? profile.country
+                        : profile.preferredCountries?.split(",")[0],
+                    hourlyRate: userRole === "AU_PAIR" ? null : profile.hourlyRate,
+                    maxBudget: userRole === "AU_PAIR" ? profile.maxBudget : null,
+                    currency: profile.currency,
                 },
-                auPair: {
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        auPairProfile: true,
-                    },
-                },
-            },
-            orderBy: { createdAt: "desc" },
-        });
-        res.json({ matches });
+            };
+        }));
+        return res.json({ matches: enhancedMatches, page, limit });
     }
     catch (error) {
-        console.error("Get my matches error:", error);
+        console.error("❌ Get matches error:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 });
 // Create a match (send match request)
-router.post("/", auth_1.authenticate, (0, planLimits_1.checkPlanLimits)({ action: "contactRequest" }), async (req, res) => {
+router.post("/", auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
         const userRole = req.user.role;
@@ -71,298 +154,122 @@ router.post("/", auth_1.authenticate, (0, planLimits_1.checkPlanLimits)({ action
         if (!targetUserId) {
             return res.status(400).json({ message: "Target user ID is required" });
         }
-        if (targetUserId === userId) {
-            return res.status(400).json({ message: "Cannot match with yourself" });
-        }
         // Verify target user exists and has opposite role
-        const targetUser = await index_1.prisma.user.findUnique({
-            where: { id: targetUserId },
-            select: {
-                id: true,
-                role: true,
-                isActive: true,
-                auPairProfile: true,
-                hostFamilyProfile: true,
-            },
-        });
-        if (!targetUser || !targetUser.isActive) {
-            return res
-                .status(404)
-                .json({ message: "Target user not found or inactive" });
-        }
-        // Verify roles are compatible
-        if ((userRole === "AU_PAIR" && targetUser.role !== "HOST_FAMILY") ||
-            (userRole === "HOST_FAMILY" && targetUser.role !== "AU_PAIR")) {
+        const { data: targetUser, error: targetError } = await supabase_1.supabase
+            .from("users")
+            .select("id, role, isActive")
+            .eq("id", targetUserId)
+            .single();
+        if (targetError || !targetUser || !targetUser.isActive) {
             return res
                 .status(400)
-                .json({ message: "Can only match au pairs with host families" });
+                .json({ message: "Target user not found or inactive" });
+        }
+        // Check roles are compatible
+        const validRolePairs = {
+            AU_PAIR: "HOST_FAMILY",
+            HOST_FAMILY: "AU_PAIR",
+        };
+        if (validRolePairs[userRole] !==
+            targetUser.role) {
+            return res.status(400).json({ message: "Invalid user role combination" });
         }
         // Check if match already exists
-        const existingMatch = await index_1.prisma.match.findFirst({
-            where: {
-                OR: [
-                    {
-                        hostId: userRole === "HOST_FAMILY" ? userId : targetUserId,
-                        auPairId: userRole === "AU_PAIR" ? userId : targetUserId,
-                    },
-                ],
-            },
-        });
+        const hostId = userRole === "HOST_FAMILY" ? userId : targetUserId;
+        const auPairId = userRole === "AU_PAIR" ? userId : targetUserId;
+        const { data: existingMatch, error: existingError } = await supabase_1.supabase
+            .from("matches")
+            .select("id")
+            .eq("hostId", hostId)
+            .eq("auPairId", auPairId)
+            .single();
         if (existingMatch) {
             return res
                 .status(400)
                 .json({ message: "Match already exists between these users" });
         }
-        // Get profiles for match score calculation
-        const currentUser = await index_1.prisma.user.findUnique({
-            where: { id: userId },
-            include: {
-                auPairProfile: true,
-                hostFamilyProfile: true,
-            },
-        });
-        // Calculate match score
-        let matchScore = 0;
-        if (userRole === "AU_PAIR" &&
-            currentUser?.auPairProfile &&
-            targetUser.hostFamilyProfile) {
-            matchScore = (0, matching_1.calculateMatchScore)(currentUser.auPairProfile, targetUser.hostFamilyProfile);
+        // Create the match
+        const matchId = (0, uuid_1.v4)();
+        const { data: newMatch, error: insertError } = await supabase_1.supabase
+            .from("matches")
+            .insert({
+            id: matchId,
+            hostId,
+            auPairId,
+            matchScore: 0, // You can implement a scoring algorithm later
+            status: "PENDING",
+            initiatedBy: userRole,
+            notes: notes || "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        })
+            .select()
+            .single();
+        if (insertError) {
+            console.error("❌ Error creating match:", insertError);
+            return res.status(500).json({ message: "Error creating match" });
         }
-        else if (userRole === "HOST_FAMILY" &&
-            currentUser?.hostFamilyProfile &&
-            targetUser.auPairProfile) {
-            matchScore = (0, matching_1.calculateMatchScore)(targetUser.auPairProfile, currentUser.hostFamilyProfile);
-        }
-        // Create match
-        const match = await index_1.prisma.match.create({
-            data: {
-                hostId: userRole === "HOST_FAMILY" ? userId : targetUserId,
-                auPairId: userRole === "AU_PAIR" ? userId : targetUserId,
-                matchScore,
-                initiatedBy: userRole,
-                notes,
-                status: "PENDING",
-            },
-            include: {
-                host: {
-                    select: {
-                        id: true,
-                        email: true,
-                        hostFamilyProfile: {
-                            select: {
-                                familyName: true,
-                                contactPersonName: true,
-                                profilePhotoUrl: true,
-                            },
-                        },
-                    },
-                },
-                auPair: {
-                    select: {
-                        id: true,
-                        email: true,
-                        auPairProfile: {
-                            select: {
-                                firstName: true,
-                                lastName: true,
-                                profilePhotoUrl: true,
-                            },
-                        },
-                    },
-                },
-            },
+        return res.status(201).json({
+            message: "Match request sent successfully",
+            match: newMatch,
         });
-        res
-            .status(201)
-            .json({ message: "Match request sent successfully", match });
     }
     catch (error) {
-        console.error("Create match error:", error);
+        console.error("❌ Create match error:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 });
-// Update match status (approve/reject)
-router.put("/:matchId/status", async (req, res) => {
+// Update match status
+router.put("/:matchId", auth_1.authenticate, async (req, res) => {
     try {
+        const userId = req.user.id;
+        const userRole = req.user.role;
         const { matchId } = req.params;
         const { status, notes } = req.body;
-        const userId = req.user.id;
         if (!["APPROVED", "REJECTED"].includes(status)) {
             return res
                 .status(400)
-                .json({ message: "Status must be APPROVED or REJECTED" });
+                .json({ message: "Invalid status. Must be APPROVED or REJECTED" });
         }
-        // Find the match
-        const match = await index_1.prisma.match.findUnique({
-            where: { id: matchId },
-            include: {
-                host: { select: { id: true } },
-                auPair: { select: { id: true } },
-            },
-        });
-        if (!match) {
+        // Get the match to verify permissions
+        const { data: match, error: matchError } = await supabase_1.supabase
+            .from("matches")
+            .select("*")
+            .eq("id", matchId)
+            .single();
+        if (matchError || !match) {
             return res.status(404).json({ message: "Match not found" });
         }
-        // Verify user is part of this match
-        if (match.hostId !== userId && match.auPairId !== userId) {
+        // Check if user is involved in this match
+        const matchField = userRole === "AU_PAIR" ? "auPairId" : "hostId";
+        if (match[matchField] !== userId) {
             return res
                 .status(403)
-                .json({ message: "You can only update matches you are part of" });
+                .json({ message: "You are not authorized to update this match" });
         }
-        // Update match status
-        const updatedMatch = await index_1.prisma.match.update({
-            where: { id: matchId },
-            data: {
-                status,
-                notes: notes || match.notes,
-                updatedAt: new Date(),
-            },
-            include: {
-                host: {
-                    select: {
-                        id: true,
-                        email: true,
-                        hostFamilyProfile: {
-                            select: {
-                                familyName: true,
-                                contactPersonName: true,
-                                profilePhotoUrl: true,
-                            },
-                        },
-                    },
-                },
-                auPair: {
-                    select: {
-                        id: true,
-                        email: true,
-                        auPairProfile: {
-                            select: {
-                                firstName: true,
-                                lastName: true,
-                                profilePhotoUrl: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
-        res.json({
-            message: "Match status updated successfully",
+        // Update the match
+        const { data: updatedMatch, error: updateError } = await supabase_1.supabase
+            .from("matches")
+            .update({
+            status,
+            notes: notes || match.notes,
+            updatedAt: new Date().toISOString(),
+        })
+            .eq("id", matchId)
+            .select()
+            .single();
+        if (updateError) {
+            console.error("❌ Error updating match:", updateError);
+            return res.status(500).json({ message: "Error updating match" });
+        }
+        return res.json({
+            message: "Match updated successfully",
             match: updatedMatch,
         });
     }
     catch (error) {
-        console.error("Update match status error:", error);
+        console.error("❌ Update match error:", error);
         res.status(500).json({ message: "Internal server error" });
-    }
-});
-// Delete a match
-router.delete("/:matchId", async (req, res) => {
-    try {
-        const { matchId } = req.params;
-        const userId = req.user.id;
-        // Find the match
-        const match = await index_1.prisma.match.findUnique({
-            where: { id: matchId },
-        });
-        if (!match) {
-            return res.status(404).json({ message: "Match not found" });
-        }
-        // Verify user is part of this match
-        if (match.hostId !== userId && match.auPairId !== userId) {
-            return res
-                .status(403)
-                .json({ message: "You can only delete matches you are part of" });
-        }
-        await index_1.prisma.match.delete({
-            where: { id: matchId },
-        });
-        res.json({ message: "Match deleted successfully" });
-    }
-    catch (error) {
-        console.error("Delete match error:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-});
-// Get recent matches
-router.get("/recent", auth_1.authenticate, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const recentMatches = await index_1.prisma.match.findMany({
-            where: {
-                OR: [{ hostId: userId }, { auPairId: userId }],
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-            take: 5,
-            include: {
-                host: {
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        hostFamilyProfile: {
-                            select: {
-                                familyName: true,
-                                contactPersonName: true,
-                                profilePhotoUrl: true,
-                            },
-                        },
-                    },
-                },
-                auPair: {
-                    select: {
-                        id: true,
-                        email: true,
-                        role: true,
-                        auPairProfile: {
-                            select: {
-                                firstName: true,
-                                lastName: true,
-                                profilePhotoUrl: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
-        const formattedMatches = recentMatches.map((match) => ({
-            id: match.id,
-            host: {
-                id: match.host.id,
-                name: match.host.hostFamilyProfile?.familyName ||
-                    match.host.hostFamilyProfile?.contactPersonName ||
-                    "Host Family",
-                role: match.host.role,
-                profile_photo_url: match.host.hostFamilyProfile?.profilePhotoUrl,
-            },
-            au_pair: {
-                id: match.auPair.id,
-                name: `${match.auPair.auPairProfile?.firstName || ""} ${match.auPair.auPairProfile?.lastName || ""}`.trim() ||
-                    "Au Pair",
-                role: match.auPair.role,
-                profile_photo_url: match.auPair.auPairProfile?.profilePhotoUrl,
-            },
-            match_score: match.matchScore,
-            status: match.status,
-            initiated_by: match.initiatedBy,
-            created_at: match.createdAt,
-            updated_at: match.updatedAt,
-        }));
-        res.json({
-            status: "success",
-            data: {
-                matches: formattedMatches,
-            },
-        });
-    }
-    catch (error) {
-        console.error("Error fetching recent matches:", error);
-        res.status(500).json({
-            status: "error",
-            message: "Failed to fetch recent matches",
-        });
     }
 });
 exports.default = router;
