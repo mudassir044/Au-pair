@@ -199,7 +199,7 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get user's bookings
-router.get('/my-bookings', async (req: AuthRequest, res) => {
+router.get('/my-bookings', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
