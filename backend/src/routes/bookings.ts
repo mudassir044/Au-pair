@@ -61,7 +61,7 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Create a booking request
-router.post('/', async (req: AuthRequest, res) => {
+router.post('/', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
