@@ -136,6 +136,9 @@ app.use("/api/calendar", calendar_1.default);
 app.use("/api/admin", admin_1.default);
 app.use("/api/dashboard", dashboard_1.default);
 app.use("/api/plans", plans_1.default);
+// Add route aliases for frontend compatibility
+app.use("/api/profile", profiles_1.default); // Alias for /api/profiles
+app.use("/api/conversations", messages_1.default); // Alias for /api/messages
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error("Error:", err.stack);

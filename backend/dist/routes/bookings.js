@@ -5,9 +5,61 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = require("../index");
+const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
+// Get all bookings for the current user (alias for my-bookings)
+router.get('/', auth_1.authenticate, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const userRole = req.user.role;
+        const status = req.query.status;
+        const upcoming = req.query.upcoming === 'true';
+        const whereClause = {};
+        if (userRole === 'AU_PAIR') {
+            whereClause.auPairId = userId;
+        }
+        else if (userRole === 'HOST_FAMILY') {
+            whereClause.hostId = userId;
+        }
+        if (status) {
+            whereClause.status = status;
+        }
+        if (upcoming) {
+            whereClause.startDate = { gte: new Date() };
+        }
+        const bookings = await index_1.prisma.booking.findMany({
+            where: whereClause,
+            include: {
+                auPair: {
+                    select: {
+                        id: true,
+                        email: true,
+                        auPairProfile: {
+                            select: { firstName: true, lastName: true, profilePhotoUrl: true }
+                        }
+                    }
+                },
+                host: {
+                    select: {
+                        id: true,
+                        email: true,
+                        hostFamilyProfile: {
+                            select: { familyName: true, contactPersonName: true, profilePhotoUrl: true }
+                        }
+                    }
+                }
+            },
+            orderBy: { startDate: 'asc' }
+        });
+        res.json({ bookings });
+    }
+    catch (error) {
+        console.error('Get bookings error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 // Create a booking request
-router.post('/', async (req, res) => {
+router.post('/', auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
         const userRole = req.user.role;
@@ -124,7 +176,7 @@ router.post('/', async (req, res) => {
     }
 });
 // Get user's bookings
-router.get('/my-bookings', async (req, res) => {
+router.get('/my-bookings', auth_1.authenticate, async (req, res) => {
     try {
         const userId = req.user.id;
         const userRole = req.user.role;
@@ -175,7 +227,7 @@ router.get('/my-bookings', async (req, res) => {
     }
 });
 // Get booking by ID
-router.get('/:bookingId', async (req, res) => {
+router.get('/:bookingId', auth_1.authenticate, async (req, res) => {
     try {
         const { bookingId } = req.params;
         const userId = req.user.id;
@@ -217,7 +269,7 @@ router.get('/:bookingId', async (req, res) => {
     }
 });
 // Update booking status
-router.put('/:bookingId/status', async (req, res) => {
+router.put('/:bookingId/status', auth_1.authenticate, async (req, res) => {
     try {
         const { bookingId } = req.params;
         const { status, notes } = req.body;
@@ -280,7 +332,7 @@ router.put('/:bookingId/status', async (req, res) => {
     }
 });
 // Update booking details
-router.put('/:bookingId', async (req, res) => {
+router.put('/:bookingId', auth_1.authenticate, async (req, res) => {
     try {
         const { bookingId } = req.params;
         const { startDate, endDate, totalHours, hourlyRate, currency, notes } = req.body;
@@ -352,7 +404,7 @@ router.put('/:bookingId', async (req, res) => {
     }
 });
 // Delete booking
-router.delete('/:bookingId', async (req, res) => {
+router.delete('/:bookingId', auth_1.authenticate, async (req, res) => {
     try {
         const { bookingId } = req.params;
         const userId = req.user.id;
@@ -381,7 +433,7 @@ router.delete('/:bookingId', async (req, res) => {
     }
 });
 // Get au pair's availability (upcoming bookings)
-router.get('/au-pair/:auPairId/availability', async (req, res) => {
+router.get('/au-pair/:auPairId/availability', auth_1.authenticate, async (req, res) => {
     try {
         const { auPairId } = req.params;
         const startDate = req.query.startDate;
