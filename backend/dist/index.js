@@ -30,6 +30,7 @@ const dashboard_1 = __importDefault(require("./routes/dashboard"));
 const plans_1 = __importDefault(require("./routes/plans"));
 const health_1 = __importDefault(require("./routes/health"));
 const demo_1 = __importDefault(require("./routes/demo"));
+const conversations_1 = __importDefault(require("./routes/conversations"));
 // Import socket handlers
 const messageHandlers_1 = require("./sockets/messageHandlers");
 const app = (0, express_1.default)();
@@ -138,7 +139,7 @@ app.use("/api/dashboard", dashboard_1.default);
 app.use("/api/plans", plans_1.default);
 // Add route aliases for frontend compatibility
 app.use("/api/profile", profiles_1.default); // Alias for /api/profiles
-app.use("/api/conversations", messages_1.default); // Alias for /api/messages
+app.use("/api/conversations", conversations_1.default); // Direct conversations route
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error("Error:", err.stack);
