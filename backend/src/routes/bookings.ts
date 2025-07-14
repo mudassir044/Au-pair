@@ -255,7 +255,7 @@ router.get('/my-bookings', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get booking by ID
-router.get('/:bookingId', async (req: AuthRequest, res) => {
+router.get('/:bookingId', authenticate, async (req: AuthRequest, res) => {
   try {
     const { bookingId } = req.params;
     const userId = req.user!.id;
