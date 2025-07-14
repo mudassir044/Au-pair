@@ -153,6 +153,10 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/plans", plansRoutes);
 
+// Add route aliases for frontend compatibility
+app.use("/api/profile", profilesRoutes);  // Alias for /api/profiles
+app.use("/api/conversations", messagesRoutes);  // Alias for /api/messages
+
 // Error handling middleware
 app.use(
   (
