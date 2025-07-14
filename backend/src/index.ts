@@ -26,6 +26,7 @@ import dashboardRoutes from "./routes/dashboard";
 import plansRoutes from "./routes/plans";
 import healthRoutes from "./routes/health";
 import demoRoutes from "./routes/demo";
+import conversationsRoutes from "./routes/conversations";
 
 // Import socket handlers
 import { setupMessageHandlers } from "./sockets/messageHandlers";
