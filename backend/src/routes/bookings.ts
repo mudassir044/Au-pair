@@ -460,7 +460,7 @@ router.put('/:bookingId', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Delete booking
-router.delete('/:bookingId', async (req: AuthRequest, res) => {
+router.delete('/:bookingId', authenticate, async (req: AuthRequest, res) => {
   try {
     const { bookingId } = req.params;
     const userId = req.user!.id;
