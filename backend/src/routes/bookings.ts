@@ -495,7 +495,7 @@ router.delete('/:bookingId', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get au pair's availability (upcoming bookings)
-router.get('/au-pair/:auPairId/availability', async (req: AuthRequest, res) => {
+router.get('/au-pair/:auPairId/availability', authenticate, async (req: AuthRequest, res) => {
   try {
     const { auPairId } = req.params;
     const startDate = req.query.startDate as string;
