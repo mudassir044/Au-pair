@@ -372,7 +372,7 @@ router.put('/:bookingId/status', authenticate, async (req: AuthRequest, res) => 
 });
 
 // Update booking details
-router.put('/:bookingId', async (req: AuthRequest, res) => {
+router.put('/:bookingId', authenticate, async (req: AuthRequest, res) => {
   try {
     const { bookingId } = req.params;
     const {
