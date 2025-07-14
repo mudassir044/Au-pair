@@ -4,6 +4,62 @@ import { AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
 
+// Get all bookings for the current user (alias for my-bookings)
+router.get('/', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+    const status = req.query.status as string;
+    const upcoming = req.query.upcoming === 'true';
+
+    const whereClause: any = {};
+
+    if (userRole === 'AU_PAIR') {
+      whereClause.auPairId = userId;
+    } else if (userRole === 'HOST_FAMILY') {
+      whereClause.hostId = userId;
+    }
+
+    if (status) {
+      whereClause.status = status;
+    }
+
+    if (upcoming) {
+      whereClause.startDate = { gte: new Date() };
+    }
+
+    const bookings = await prisma.booking.findMany({
+      where: whereClause,
+      include: {
+        auPair: {
+          select: {
+            id: true,
+            email: true,
+            auPairProfile: {
+              select: { firstName: true, lastName: true, profilePhotoUrl: true }
+            }
+          }
+        },
+        host: {
+          select: {
+            id: true,
+            email: true,
+            hostFamilyProfile: {
+              select: { familyName: true, contactPersonName: true, profilePhotoUrl: true }
+            }
+          }
+        }
+      },
+      orderBy: { startDate: 'asc' }
+    });
+
+    res.json({ bookings });
+  } catch (error) {
+    console.error('Get bookings error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Create a booking request
 router.post('/', async (req: AuthRequest, res) => {
   try {
