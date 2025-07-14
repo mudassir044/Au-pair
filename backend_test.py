@@ -12,8 +12,8 @@ from typing import Dict, Any, Optional
 # Configuration
 BASE_URL = "http://localhost:8001"
 DEMO_CREDENTIALS = {
-    "au_pair": {"email": "sarah@demo.com", "password": "any_password"},
-    "host_family": {"email": "mueller@demo.com", "password": "any_password"}
+    "au_pair": {"email": "sarah@demo.com", "password": "password123"},
+    "host_family": {"email": "mueller@demo.com", "password": "password123"}
 }
 
 class APITester:
