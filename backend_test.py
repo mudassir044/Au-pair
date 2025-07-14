@@ -46,13 +46,19 @@ class APITester:
         
         try:
             if method.upper() == "GET":
-                return self.session.get(url, headers=request_headers)
+                return self.session.get(url, headers=request_headers, timeout=10)
             elif method.upper() == "POST":
-                return self.session.post(url, json=data, headers=request_headers)
+                return self.session.post(url, json=data, headers=request_headers, timeout=10)
             elif method.upper() == "PUT":
-                return self.session.put(url, json=data, headers=request_headers)
+                return self.session.put(url, json=data, headers=request_headers, timeout=10)
             elif method.upper() == "DELETE":
-                return self.session.delete(url, headers=request_headers)
+                return self.session.delete(url, headers=request_headers, timeout=10)
+        except requests.exceptions.Timeout:
+            print(f"Request timeout for {method} {endpoint}")
+            return None
+        except requests.exceptions.ConnectionError:
+            print(f"Connection error for {method} {endpoint}")
+            return None
         except Exception as e:
             print(f"Request failed: {e}")
             return None
