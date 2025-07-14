@@ -5,7 +5,7 @@ import { AuthRequest, authenticate } from '../middleware/auth';
 const router = express.Router();
 
 // Get all bookings for the current user (alias for my-bookings)
-router.get('/', async (req: AuthRequest, res) => {
+router.get('/', authenticate, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
