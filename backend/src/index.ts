@@ -156,7 +156,7 @@ app.use("/api/plans", plansRoutes);
 
 // Add route aliases for frontend compatibility
 app.use("/api/profile", profilesRoutes);  // Alias for /api/profiles
-app.use("/api/conversations", messagesRoutes);  // Alias for /api/messages
+app.use("/api/conversations", conversationsRoutes);  // Direct conversations route
 
 // Error handling middleware
 app.use(
