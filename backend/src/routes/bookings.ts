@@ -301,7 +301,7 @@ router.get('/:bookingId', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Update booking status
-router.put('/:bookingId/status', async (req: AuthRequest, res) => {
+router.put('/:bookingId/status', authenticate, async (req: AuthRequest, res) => {
   try {
     const { bookingId } = req.params;
     const { status, notes } = req.body;
